@@ -1,9 +1,13 @@
-[gd_scene load_steps=7 format=3 uid="uid://bjqwhnq4el5mm"]
+[gd_scene load_steps=10 format=3 uid="uid://bjqwhnq4el5mm"]
 
 [ext_resource type="Script" path="res://scripts/player/player_test_actor.gd" id="1_hhbmx"]
 [ext_resource type="Resource" path="res://resources/characters/player_combat_profile.tres" id="2_x3g8n"]
 [ext_resource type="Resource" path="res://resources/characters/player_motion_profile.tres" id="3_yq2w7"]
 [ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="4_ykmbn"]
+[ext_resource type="Script" path="res://scripts/common/area_debug_outline.gd" id="5_h7m2b"]
+[ext_resource type="Script" path="res://scripts/common/world_health_bar.gd" id="6_g8s3t"]
+[ext_resource type="Script" path="res://scripts/common/state_outline_2d.gd" id="7_m1t2q"]
+[ext_resource type="Script" path="res://scripts/common/aim_guide_2d.gd" id="8_t9gs1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(18, 30)
@@ -11,16 +15,31 @@ size = Vector2(18, 30)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hurtbox"]
 size = Vector2(18, 30)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_attack_hitbox"]
+size = Vector2(22, 18)
+
 [node name="PlayerTestActor" type="CharacterBody2D"]
 script = ExtResource("1_hhbmx")
 combat_profile = ExtResource("2_x3g8n")
 motion_profile = ExtResource("3_yq2w7")
+collision_layer = 2
+collision_mask = 5
 
 [node name="SpriteRoot" type="Node2D" parent="."]
 
 [node name="BodyVisual" type="Polygon2D" parent="SpriteRoot"]
 color = Color(0.294118, 0.686275, 0.901961, 1)
 polygon = PackedVector2Array(-9, -15, 9, -15, 9, 15, -9, 15)
+
+[node name="GuardOutline" type="Node2D" parent="."]
+script = ExtResource("7_m1t2q")
+outline_size = Vector2(26, 38)
+outline_color = Color(0.4, 1, 0.82, 0.95)
+
+[node name="AimGuide" type="Node2D" parent="."]
+script = ExtResource("8_t9gs1")
+position = Vector2(0, -8)
+guide_length = 42.0
 
 [node name="FollowCamera" type="Camera2D" parent="."]
 position = Vector2(0, -24)
@@ -37,6 +56,14 @@ shape = SubResource("RectangleShape2D_body")
 shape = SubResource("RectangleShape2D_hurtbox")
 
 [node name="HitboxAnchor" type="Node2D" parent="."]
+
+[node name="AttackHitbox" type="Area2D" parent="HitboxAnchor"]
+script = ExtResource("5_h7m2b")
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxAnchor/AttackHitbox"]
+shape = SubResource("RectangleShape2D_attack_hitbox")
 
 [node name="HeadRay" type="RayCast2D" parent="."]
 position = Vector2(0, -14)
@@ -55,3 +82,8 @@ enabled = true
 
 [node name="PlayerController" type="Node" parent="."]
 script = ExtResource("4_ykmbn")
+
+[node name="HealthBar" type="Node2D" parent="."]
+script = ExtResource("6_g8s3t")
+target_path = NodePath("..")
+bar_offset = Vector2(-20, -40)

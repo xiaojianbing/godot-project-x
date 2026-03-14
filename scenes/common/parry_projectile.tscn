@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/common/parry_projectile.gd" id="1_p8lga"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_projectile"]
+radius = 6.0
+
+[node name="ParryProjectile" type="Area2D"]
+script = ExtResource("1_p8lga")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_projectile")
+
+[node name="Visual" type="Polygon2D" parent="."]
+color = Color(0.968627, 0.792157, 0.309804, 1)
+polygon = PackedVector2Array(0, -6, 6, 0, 0, 6, -6, 0)

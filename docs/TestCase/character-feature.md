@@ -45,6 +45,7 @@
 | CF-08 | Entity Integration Matrix | Pending | 验证不同实体接入差异 |
 | CF-09 | Non-Character Destructible | Pending | 验证轻量接入模型 |
 | CF-10 | Locomotion Dependency Boundary | Pending | 验证与移动系统边界 |
+| CF-11 | EnemyCharacter Physics Loop | Pending | 验证敌人角色重力与落地 |
 
 ## Test Cases
 
@@ -146,6 +147,16 @@
 - Expected:
 - `CharacterFeature` 负责角色基础真相。
 - `Locomotion` 不重复定义或持有基础属性逻辑。
+
+### CF-11 EnemyCharacter Physics Loop
+
+- Goal: 验证真正的敌人角色接入统一角色物理层。
+- Steps:
+- 在测试房生成 `EnemyCharacter`，观察其出生后受重力下落并稳定落地。
+- 让其在受击与重生后再次恢复地面状态。
+- Expected:
+- 敌人通过 `CharacterBody2D` 和 `_physics_process()` 参与物理更新。
+- 重力、地面、受击击退与重生不会绕开统一角色基础设施。
 
 ## Exit Criteria
 

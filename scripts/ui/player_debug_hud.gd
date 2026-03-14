@@ -16,13 +16,13 @@ func _process(_delta: float) -> void:
 		_label.text = "Target is not PlayerTestActor"
 		return
 	var player_actor: PlayerTestActor = actor as PlayerTestActor
-	var state_id := "n/a"
-	var locomotion_state_machine := player_actor.get_locomotion_state_machine()
+	var state_id: String = "n/a"
+	var locomotion_state_machine: LocomotionStateMachine = player_actor.get_locomotion_state_machine()
 	if locomotion_state_machine != null:
 		state_id = String(locomotion_state_machine.get_current_state_id())
 	var signals: CharacterSignals = player_actor.signals
 	var stats: CharacterStats = player_actor.stats
-	_label.text = "STATE: %s\nVEL: (%.1f, %.1f)\nFLOOR: %s\nWALL: %s\nLEDGE: %s\nGRAPPLE: %s\nSWIM: %s\nCROUCH: %s\nUNLOCKS: DJ=%s SW=%s GP=%s\nAIR_JUMPS: %d\nHP: %.1f / %.1f\nENERGY: %.1f / %.1f\nDASH: %.2f\nCOYOTE: %.2f" % [
+	_label.text = "STATE: %s\nVEL: (%.1f, %.1f)\nFLOOR: %s\nWALL: %s\nLEDGE: %s\nGRAPPLE: %s\nSWIM: %s\nGUARD: %s\nPARRY_WIN: %.2f\nCROUCH: %s\nUNLOCKS: DJ=%s SW=%s GP=%s\nAIR_JUMPS: %d\nHP: %.1f / %.1f\nENERGY: %.1f / %.1f\nDASH: %.2f\nCOYOTE: %.2f" % [
 		state_id,
 		player_actor.velocity.x,
 		player_actor.velocity.y,
@@ -31,6 +31,8 @@ func _process(_delta: float) -> void:
 		str(player_actor.is_edge_hanging()),
 		str(player_actor.is_grappling()),
 		str(player_actor.is_swimming()),
+		str(player_actor.is_guarding()),
+		player_actor.get_parry_window_remaining(),
 		str(player_actor.is_crouching()),
 		str(player_actor.double_jump_unlocked),
 		str(player_actor.swim_unlocked),
@@ -45,4 +47,4 @@ func _process(_delta: float) -> void:
 	]
 	if signals != null:
 		_label.text += "\nACTION: %s\nINVINCIBLE: %s" % [String(signals.current_action_tag), str(signals.is_invincible)]
-	_label.text += "\nJUMP_FAIL: %s\nDASH_FAIL: %s\nSWIM_FAIL: %s\nGRAPPLE_FAIL: %s" % [player_actor.get_last_jump_failure_reason(), player_actor.get_last_dash_failure_reason(), player_actor.get_last_swim_failure_reason(), player_actor.get_last_grapple_failure_reason()]
+	_label.text += "\nATTACK: %s\nCOMBAT: %s\nJUMP_FAIL: %s\nDASH_FAIL: %s\nSWIM_FAIL: %s\nGRAPPLE_FAIL: %s" % [player_actor.get_last_attack_action(), player_actor.get_last_combat_result(), player_actor.get_last_jump_failure_reason(), player_actor.get_last_dash_failure_reason(), player_actor.get_last_swim_failure_reason(), player_actor.get_last_grapple_failure_reason()]

@@ -38,10 +38,12 @@ func _physics_process(delta: float) -> void:
 	actor._handle_input_buffering()
 	actor._update_runtime_timers(delta)
 	actor._update_detection_rays()
+	actor._update_combat_input()
 	locomotion_state_machine.sync_from_actor(actor)
 	locomotion_state_machine.update_physics(actor, delta)
 	if not actor.should_skip_motion_commit():
 		locomotion_motor.move(actor)
+	actor._update_combat_runtime(delta)
 	locomotion_state_machine.sync_from_actor(actor)
 	actor._update_runtime_signals()
 

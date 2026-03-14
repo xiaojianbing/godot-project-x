@@ -68,6 +68,15 @@ Character Scene
 - `DamageReceiver` 是统一受击入口，负责把命中数据送入数值层，再把结果交给行为层。
 - `CharacterContext` 只做运行时聚合与只读访问入口，不承担复杂公式结算。
 
+### 5.1 `EnemyCharacter` 最小落地要求
+
+- `EnemyCharacter` 默认以 `CharacterBody2D` 作为根节点，而不是 `Node2D`。
+- 必须参与 `_physics_process()`，接受重力、地面判定与 `move_and_slide()` 结果。
+- 必须复用 `CharacterStats`、`CharacterSignals`、`CharacterContext`、`DamageReceiver` 这条统一角色链路。
+- 基础测试敌人允许只有轻量 AI，但不能绕开角色物理层直接用 `global_position` 假装移动。
+- 受击击退应优先写入角色速度或受击速度，而不是长期直接改位置。
+- 敌人的追击/开火/近战选择应优先挂到可替换的轻量 AI 协作者，而不是持续堆进 `EnemyCharacter` 本体。
+
 ## 6. 核心模块职责
 
 ### 6.1 `CharacterStats`

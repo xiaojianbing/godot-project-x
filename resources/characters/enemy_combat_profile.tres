@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="CharacterCombatProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/characters/character_combat_profile.gd" id="1_7pp1a"]
+
+[resource]
+script = ExtResource("1_7pp1a")
+base_max_hp = 72.0
+base_attack_power = 10.0
+hurt_invincible_duration = 0.0
+hurt_knockback_ground = Vector2(78, -54)
+hurt_knockback_projectile = Vector2(92, -68)
+guard_chip_ratio = 0.2
+guard_front_angle = 120.0
+light_attack_hitstun_duration = 0.16
+heavy_attack_hitstun_duration = 0.24
+shoot_hitstun_duration = 0.14
+light_attack_knockback = Vector2(64, -14)
+heavy_attack_knockback = Vector2(120, -28)
+shoot_knockback = Vector2(80, -20)
+shoot_projectile_speed = 220.0
+shoot_projectile_lifetime = 2.6

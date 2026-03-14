@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CharacterMotionProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/characters/character_motion_profile.gd" id="1_1d6m6"]
+
+[resource]
+script = ExtResource("1_1d6m6")
+base_move_speed = 110.0
+ground_acceleration = 900.0
+ground_deceleration = 1100.0
+jump_velocity = -320.0
+gravity_up = 1200.0
+gravity_down = 1600.0
+free_fall_reference_speed = 180.0

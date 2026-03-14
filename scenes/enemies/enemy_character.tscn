@@ -1,0 +1,49 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/enemy_character.gd" id="1_w8k1m"]
+[ext_resource type="Resource" path="res://resources/characters/enemy_combat_profile.tres" id="2_t3wmu"]
+[ext_resource type="Resource" path="res://resources/characters/enemy_motion_profile.tres" id="3_i2hdg"]
+[ext_resource type="PackedScene" path="res://scenes/common/parry_projectile.tscn" id="4_qxii2"]
+[ext_resource type="Script" path="res://scripts/common/world_health_bar.gd" id="5_ly9wu"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(22, 34)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_attack"]
+size = Vector2(30, 28)
+
+[node name="EnemyCharacter" type="CharacterBody2D"]
+script = ExtResource("1_w8k1m")
+combat_profile = ExtResource("2_t3wmu")
+motion_profile = ExtResource("3_i2hdg")
+projectile_scene = ExtResource("4_qxii2")
+collision_layer = 4
+collision_mask = 1
+
+[node name="SpriteRoot" type="Node2D" parent="."]
+
+[node name="BodyVisual" type="Polygon2D" parent="SpriteRoot"]
+color = Color(0.823529, 0.380392, 0.380392, 1)
+polygon = PackedVector2Array(-11, -17, 11, -17, 11, 17, -11, 17)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_body")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("RectangleShape2D_body")
+
+[node name="AttackArea" type="Area2D" parent="."]
+position = Vector2(22, -2)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea"]
+shape = SubResource("RectangleShape2D_attack")
+
+[node name="ProjectileSpawn" type="Marker2D" parent="."]
+position = Vector2(18, -10)
+
+[node name="HealthBar" type="Node2D" parent="."]
+script = ExtResource("5_ly9wu")
+target_path = NodePath("..")
+bar_offset = Vector2(-20, -42)

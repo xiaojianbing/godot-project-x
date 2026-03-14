@@ -1,0 +1,102 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player/player_test_actor.tscn" id="1_wa7p0"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/enemy_character.tscn" id="2_j1l0v"]
+[ext_resource type="Script" path="res://scripts/ui/player_debug_hud.gd" id="3_b2uwp"]
+[ext_resource type="Script" path="res://scripts/testrooms/combat_foundation_test_room.gd" id="4_5tlq1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
+size = Vector2(760, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
+size = Vector2(180, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(40, 240)
+
+[node name="CombatFoundationTestRoom" type="Node2D"]
+script = ExtResource("4_5tlq1")
+
+[node name="Player" parent="." instance=ExtResource("1_wa7p0")]
+position = Vector2(140, 180)
+
+[node name="Ground" type="StaticBody2D" parent="."]
+position = Vector2(380, 320)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground"]
+shape = SubResource("RectangleShape2D_ground")
+
+[node name="Visual" type="Polygon2D" parent="Ground"]
+color = Color(0.180392, 0.203922, 0.25098, 1)
+polygon = PackedVector2Array(-380, -20, 380, -20, 380, 20, -380, 20)
+
+[node name="AirParryPlatform" type="StaticBody2D" parent="."]
+position = Vector2(250, 210)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AirParryPlatform"]
+shape = SubResource("RectangleShape2D_platform")
+
+[node name="Visual" type="Polygon2D" parent="AirParryPlatform"]
+color = Color(0.266667, 0.376471, 0.466667, 1)
+polygon = PackedVector2Array(-90, -10, 90, -10, 90, 10, -90, 10)
+
+[node name="LeftWall" type="StaticBody2D" parent="."]
+position = Vector2(24, 200)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="Visual" type="Polygon2D" parent="LeftWall"]
+color = Color(0.180392, 0.203922, 0.25098, 1)
+polygon = PackedVector2Array(-20, -120, 20, -120, 20, 120, -20, 120)
+
+[node name="MeleeDummy" parent="." instance=ExtResource("2_j1l0v")]
+position = Vector2(520, 282)
+player_path = NodePath("../Player")
+
+[node name="ProjectileDummy" parent="." instance=ExtResource("2_j1l0v")]
+position = Vector2(650, 182)
+player_path = NodePath("../Player")
+contact_damage = 10.0
+projectile_damage = 12.0
+
+[node name="SectionMarkers" type="Node2D" parent="."]
+
+[node name="StartLabel" type="Label" parent="SectionMarkers"]
+position = Vector2(104, 96)
+theme_override_font_sizes/font_size = 18
+text = "P0-B Combat Foundation"
+
+[node name="GuardLabel" type="Label" parent="SectionMarkers"]
+position = Vector2(438, 114)
+theme_override_font_sizes/font_size = 16
+text = "Ground Attack / Guard / Ground Parry"
+
+[node name="AirParryLabel" type="Label" parent="SectionMarkers"]
+position = Vector2(560, 48)
+theme_override_font_sizes/font_size = 16
+text = "Projectile / Air Parry"
+
+[node name="InputLabel" type="Label" parent="SectionMarkers"]
+position = Vector2(92, 126)
+theme_override_font_sizes/font_size = 14
+text = "Light: F / X  Heavy: G / Y  Shoot: R / B  Guard: L / RShoulder  Reset: T / Back"
+
+[node name="PlayerDebugHud" type="CanvasLayer" parent="."]
+script = ExtResource("3_b2uwp")
+target_path = NodePath("../Player")
+
+[node name="PanelContainer" type="PanelContainer" parent="PlayerDebugHud"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 252.0
+offset_bottom = 252.0
+
+[node name="MarginContainer" type="MarginContainer" parent="PlayerDebugHud/PanelContainer"]
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="DebugLabel" type="Label" parent="PlayerDebugHud/PanelContainer/MarginContainer"]
+text = "Combat Debug"
