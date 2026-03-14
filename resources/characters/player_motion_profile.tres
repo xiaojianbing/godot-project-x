@@ -1,0 +1,6 @@
+[gd_resource type="Resource" script_class="CharacterMotionProfile" format=3 uid="uid://cicunvu4oc2dp"]
+
+[ext_resource type="Script" uid="uid://dvaxcfdrlqxhl" path="res://resources/characters/character_motion_profile.gd" id="1_blvjc"]
+
+[resource]
+script = ExtResource("1_blvjc")

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CharacterCombatProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/characters/character_combat_profile.gd" id="1_6h8gv"]
+
+[resource]
+script = ExtResource("1_6h8gv")
+base_max_hp = 100.0
+base_max_energy = 100.0
+starting_energy = 0.0
+base_attack_power = 12.0
+base_defense_ratio = 1.0
+base_poise = 0.0
+base_stun_resistance = 0.0
+base_knockback_resistance = 0.0

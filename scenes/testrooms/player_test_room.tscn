@@ -1,0 +1,690 @@
+[gd_scene format=3 uid="uid://b1p7sujdbugxk"]
+
+[ext_resource type="PackedScene" uid="uid://bjqwhnq4el5mm" path="res://scenes/player/player_test_actor.tscn" id="1_70u75"]
+[ext_resource type="Script" uid="uid://dj37kpfxnvs55" path="res://scripts/ui/player_debug_hud.gd" id="2_d0p0w"]
+[ext_resource type="Script" uid="uid://bo64a8aiwuhms" path="res://scripts/common/water_volume.gd" id="3_dkn3m"]
+[ext_resource type="Script" uid="uid://fkn3lqpkwk1p" path="res://scripts/common/grapple_point.gd" id="4_xm3kw"]
+[ext_resource type="Script" uid="uid://cjmndquwqrh68" path="res://scripts/common/ability_unlock_switch.gd" id="5_4sb0k"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
+size = Vector2(640, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_short_platform"]
+size = Vector2(96, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tall_platform"]
+size = Vector2(160, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ledge_block"]
+size = Vector2(80, 120)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ceiling"]
+size = Vector2(140, 18)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tunnel_floor_long"]
+size = Vector2(220, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(40, 240)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_basin_floor"]
+size = Vector2(220, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_basin_wall"]
+size = Vector2(20, 140)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_shallow_water"]
+size = Vector2(180, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_deep_water"]
+size = Vector2(180, 140)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_switch"]
+size = Vector2(36, 36)
+
+[node name="PlayerTestRoom" type="Node2D" unique_id=1901338597]
+
+[node name="Player" parent="." unique_id=548442715 instance=ExtResource("1_70u75")]
+position = Vector2(160, 180)
+
+[node name="Ground" type="StaticBody2D" parent="." unique_id=459947151]
+position = Vector2(320, 280)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground" unique_id=1316122057]
+shape = SubResource("RectangleShape2D_ground")
+
+[node name="GroundVisual" type="Polygon2D" parent="Ground" unique_id=542769126]
+color = Color(0.203922, 0.227451, 0.282353, 1)
+polygon = PackedVector2Array(-320, -20, 320, -20, 320, 20, -320, 20)
+
+[node name="JumpPlatformA" type="StaticBody2D" parent="." unique_id=1251609849]
+position = Vector2(460, 220)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="JumpPlatformA" unique_id=1644933681]
+shape = SubResource("RectangleShape2D_short_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="JumpPlatformA" unique_id=1983397466]
+color = Color(0.345098, 0.45098, 0.611765, 1)
+polygon = PackedVector2Array(-48, -10, 48, -10, 48, 10, -48, 10)
+
+[node name="JumpPlatformB" type="StaticBody2D" parent="." unique_id=1073391595]
+position = Vector2(680, 168)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="JumpPlatformB" unique_id=1128845528]
+shape = SubResource("RectangleShape2D_short_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="JumpPlatformB" unique_id=493270694]
+color = Color(0.345098, 0.45098, 0.611765, 1)
+polygon = PackedVector2Array(-48, -10, 48, -10, 48, 10, -48, 10)
+
+[node name="GapPlatform" type="StaticBody2D" parent="." unique_id=2103748905]
+position = Vector2(980, 280)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GapPlatform" unique_id=472078291]
+shape = SubResource("RectangleShape2D_tall_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="GapPlatform" unique_id=344884205]
+color = Color(0.239216, 0.388235, 0.466667, 1)
+polygon = PackedVector2Array(-80, -10, 80, -10, 80, 10, -80, 10)
+
+[node name="FarPlatform" type="StaticBody2D" parent="." unique_id=1290033612]
+position = Vector2(1280, 280)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FarPlatform" unique_id=1553662480]
+shape = SubResource("RectangleShape2D_tall_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="FarPlatform" unique_id=44661579]
+color = Color(0.239216, 0.388235, 0.466667, 1)
+polygon = PackedVector2Array(-80, -10, 80, -10, 80, 10, -80, 10)
+
+[node name="LedgeBlock" type="StaticBody2D" parent="." unique_id=303362482]
+position = Vector2(1480, 220)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LedgeBlock" unique_id=107076343]
+shape = SubResource("RectangleShape2D_ledge_block")
+
+[node name="BlockVisual" type="Polygon2D" parent="LedgeBlock" unique_id=2063023174]
+color = Color(0.411765, 0.494118, 0.580392, 1)
+polygon = PackedVector2Array(-40, -60, 40, -60, 40, 60, -40, 60)
+
+[node name="CeilingTunnel" type="StaticBody2D" parent="." unique_id=980520679]
+position = Vector2(1795, 237)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CeilingTunnel" unique_id=160735020]
+shape = SubResource("RectangleShape2D_ceiling")
+
+[node name="CeilingVisual" type="Polygon2D" parent="CeilingTunnel" unique_id=821154692]
+color = Color(0.52549, 0.337255, 0.278431, 1)
+polygon = PackedVector2Array(-70, -9, 70, -9, 70, 9, -70, 9)
+
+[node name="TunnelFloor" type="StaticBody2D" parent="." unique_id=1085952894]
+position = Vector2(1790, 280)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TunnelFloor" unique_id=308248701]
+shape = SubResource("RectangleShape2D_tunnel_floor_long")
+
+[node name="FloorVisual" type="Polygon2D" parent="TunnelFloor" unique_id=2065558340]
+color = Color(0.294118, 0.262745, 0.215686, 1)
+polygon = PackedVector2Array(-110, -10, 110, -10, 110, 10, -110, 10)
+
+[node name="WallJumpTowerLeft" type="StaticBody2D" parent="." unique_id=2004184726]
+position = Vector2(2140, 120)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallJumpTowerLeft" unique_id=676370711]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="WallVisual" type="Polygon2D" parent="WallJumpTowerLeft" unique_id=614469393]
+color = Color(0.305882, 0.364706, 0.443137, 1)
+polygon = PackedVector2Array(-20, -120, 20, -120, 20, 120, -20, 120)
+
+[node name="WallJumpTowerRight" type="StaticBody2D" parent="." unique_id=242748366]
+position = Vector2(2280, 120)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallJumpTowerRight" unique_id=1211274138]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="WallVisual" type="Polygon2D" parent="WallJumpTowerRight" unique_id=1450557316]
+color = Color(0.305882, 0.364706, 0.443137, 1)
+polygon = PackedVector2Array(-20, -120, 20, -120, 20, 120, -20, 120)
+
+[node name="WallJumpFloor" type="StaticBody2D" parent="." unique_id=1008679120]
+position = Vector2(2210, 280)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallJumpFloor" unique_id=1782696204]
+shape = SubResource("RectangleShape2D_short_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="WallJumpFloor" unique_id=1859428029]
+color = Color(0.196078, 0.333333, 0.411765, 1)
+polygon = PackedVector2Array(-48, -10, 48, -10, 48, 10, -48, 10)
+
+[node name="DoubleJumpStart" type="StaticBody2D" parent="." unique_id=2126160749]
+position = Vector2(2540, 280)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DoubleJumpStart" unique_id=362922710]
+shape = SubResource("RectangleShape2D_tall_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="DoubleJumpStart" unique_id=2109457445]
+color = Color(0.2, 0.364706, 0.486275, 1)
+polygon = PackedVector2Array(-80, -10, 80, -10, 80, 10, -80, 10)
+
+[node name="DoubleJumpMid" type="StaticBody2D" parent="." unique_id=140445789]
+position = Vector2(2750, 188)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DoubleJumpMid" unique_id=1213689437]
+shape = SubResource("RectangleShape2D_short_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="DoubleJumpMid" unique_id=291414617]
+color = Color(0.2, 0.454902, 0.603922, 1)
+polygon = PackedVector2Array(-48, -10, 48, -10, 48, 10, -48, 10)
+
+[node name="DoubleJumpEnd" type="StaticBody2D" parent="." unique_id=2061763292]
+position = Vector2(2980, 120)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DoubleJumpEnd" unique_id=247418941]
+shape = SubResource("RectangleShape2D_short_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="DoubleJumpEnd" unique_id=864368949]
+color = Color(0.2, 0.454902, 0.603922, 1)
+polygon = PackedVector2Array(-48, -10, 48, -10, 48, 10, -48, 10)
+
+[node name="CrouchTunnelFloor" type="StaticBody2D" parent="." unique_id=2098602720]
+position = Vector2(3340, 280)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CrouchTunnelFloor" unique_id=2028625714]
+shape = SubResource("RectangleShape2D_tall_platform")
+
+[node name="FloorVisual" type="Polygon2D" parent="CrouchTunnelFloor" unique_id=989104952]
+color = Color(0.321569, 0.270588, 0.227451, 1)
+polygon = PackedVector2Array(-80, -10, 80, -10, 80, 10, -80, 10)
+
+[node name="CrouchTunnelCeiling" type="StaticBody2D" parent="." unique_id=982967892]
+position = Vector2(3340, 238)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CrouchTunnelCeiling" unique_id=1599586959]
+shape = SubResource("RectangleShape2D_tall_platform")
+
+[node name="CeilingVisual" type="Polygon2D" parent="CrouchTunnelCeiling" unique_id=185783597]
+color = Color(0.521569, 0.376471, 0.294118, 1)
+polygon = PackedVector2Array(-80, -10, 80, -10, 80, 10, -80, 10)
+
+[node name="CrouchTunnelExit" type="StaticBody2D" parent="." unique_id=494385139]
+position = Vector2(3560, 280)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CrouchTunnelExit" unique_id=248041206]
+shape = SubResource("RectangleShape2D_short_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="CrouchTunnelExit" unique_id=994443669]
+color = Color(0.321569, 0.270588, 0.227451, 1)
+polygon = PackedVector2Array(-48, -10, 48, -10, 48, 10, -48, 10)
+
+[node name="ShallowPoolFloor" type="StaticBody2D" parent="." unique_id=575282974]
+position = Vector2(3860, 320)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ShallowPoolFloor" unique_id=2074078315]
+shape = SubResource("RectangleShape2D_basin_floor")
+
+[node name="FloorVisual" type="Polygon2D" parent="ShallowPoolFloor" unique_id=1137695982]
+color = Color(0.247059, 0.262745, 0.278431, 1)
+polygon = PackedVector2Array(-110, -10, 110, -10, 110, 10, -110, 10)
+
+[node name="ShallowPoolLeftWall" type="StaticBody2D" parent="." unique_id=1127884618]
+position = Vector2(3750, 250)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ShallowPoolLeftWall" unique_id=2070464358]
+shape = SubResource("RectangleShape2D_basin_wall")
+
+[node name="WallVisual" type="Polygon2D" parent="ShallowPoolLeftWall" unique_id=504410829]
+color = Color(0.247059, 0.262745, 0.278431, 1)
+polygon = PackedVector2Array(-10, -70, 10, -70, 10, 70, -10, 70)
+
+[node name="ShallowPoolRightWall" type="StaticBody2D" parent="." unique_id=1743486467]
+position = Vector2(3970, 250)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ShallowPoolRightWall" unique_id=540299944]
+shape = SubResource("RectangleShape2D_basin_wall")
+
+[node name="WallVisual" type="Polygon2D" parent="ShallowPoolRightWall" unique_id=661948502]
+color = Color(0.247059, 0.262745, 0.278431, 1)
+polygon = PackedVector2Array(-10, -70, 10, -70, 10, 70, -10, 70)
+
+[node name="ShallowWater" type="Area2D" parent="." unique_id=36904699]
+position = Vector2(3860, 284)
+script = ExtResource("3_dkn3m")
+water_mode = "shallow"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ShallowWater" unique_id=592458442]
+shape = SubResource("RectangleShape2D_shallow_water")
+
+[node name="WaterVisual" type="Polygon2D" parent="ShallowWater" unique_id=164201258]
+color = Color(0.235294, 0.627451, 0.803922, 0.45)
+polygon = PackedVector2Array(-90, -24, 90, -24, 90, 24, -90, 24)
+
+[node name="DeepPoolFloor" type="StaticBody2D" parent="." unique_id=110288272]
+position = Vector2(4300, 360)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DeepPoolFloor" unique_id=685731276]
+shape = SubResource("RectangleShape2D_basin_floor")
+
+[node name="FloorVisual" type="Polygon2D" parent="DeepPoolFloor" unique_id=1122324627]
+color = Color(0.219608, 0.239216, 0.258824, 1)
+polygon = PackedVector2Array(-110, -10, 110, -10, 110, 10, -110, 10)
+
+[node name="DeepPoolLeftWall" type="StaticBody2D" parent="." unique_id=566606207]
+position = Vector2(4190, 290)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DeepPoolLeftWall" unique_id=1102925331]
+shape = SubResource("RectangleShape2D_basin_wall")
+
+[node name="WallVisual" type="Polygon2D" parent="DeepPoolLeftWall" unique_id=314896390]
+color = Color(0.219608, 0.239216, 0.258824, 1)
+polygon = PackedVector2Array(-10, -70, 10, -70, 10, 70, -10, 70)
+
+[node name="DeepPoolRightWall" type="StaticBody2D" parent="." unique_id=1872451363]
+position = Vector2(4410, 290)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DeepPoolRightWall" unique_id=317431116]
+shape = SubResource("RectangleShape2D_basin_wall")
+
+[node name="WallVisual" type="Polygon2D" parent="DeepPoolRightWall" unique_id=460582173]
+color = Color(0.219608, 0.239216, 0.258824, 1)
+polygon = PackedVector2Array(-10, -70, 10, -70, 10, 70, -10, 70)
+
+[node name="DeepWater" type="Area2D" parent="." unique_id=382817551]
+position = Vector2(4300, 280)
+script = ExtResource("3_dkn3m")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DeepWater" unique_id=1632254344]
+shape = SubResource("RectangleShape2D_deep_water")
+
+[node name="WaterVisual" type="Polygon2D" parent="DeepWater" unique_id=897943044]
+color = Color(0.160784, 0.439216, 0.690196, 0.5)
+polygon = PackedVector2Array(-90, -70, 90, -70, 90, 70, -90, 70)
+
+[node name="WaterRespawn" type="Marker2D" parent="." unique_id=428861547]
+position = Vector2(4540, 180)
+
+[node name="LockedPoolFloor" type="StaticBody2D" parent="." unique_id=1257136561]
+position = Vector2(4760, 360)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LockedPoolFloor" unique_id=1110831656]
+shape = SubResource("RectangleShape2D_basin_floor")
+
+[node name="FloorVisual" type="Polygon2D" parent="LockedPoolFloor" unique_id=683028558]
+color = Color(0.219608, 0.203922, 0.243137, 1)
+polygon = PackedVector2Array(-110, -10, 110, -10, 110, 10, -110, 10)
+
+[node name="LockedPoolLeftWall" type="StaticBody2D" parent="." unique_id=887721988]
+position = Vector2(4650, 290)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LockedPoolLeftWall" unique_id=513163623]
+shape = SubResource("RectangleShape2D_basin_wall")
+
+[node name="WallVisual" type="Polygon2D" parent="LockedPoolLeftWall" unique_id=204049125]
+color = Color(0.219608, 0.203922, 0.243137, 1)
+polygon = PackedVector2Array(-10, -70, 10, -70, 10, 70, -10, 70)
+
+[node name="LockedPoolRightWall" type="StaticBody2D" parent="." unique_id=1884479709]
+position = Vector2(4870, 290)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LockedPoolRightWall" unique_id=786467477]
+shape = SubResource("RectangleShape2D_basin_wall")
+
+[node name="WallVisual" type="Polygon2D" parent="LockedPoolRightWall" unique_id=574832293]
+color = Color(0.219608, 0.203922, 0.243137, 1)
+polygon = PackedVector2Array(-10, -70, 10, -70, 10, 70, -10, 70)
+
+[node name="LockedDeepWater" type="Area2D" parent="." unique_id=953054582]
+position = Vector2(4760, 280)
+script = ExtResource("3_dkn3m")
+requires_swim_unlock = true
+respawn_marker_path = NodePath("../WaterRespawn")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LockedDeepWater" unique_id=552912495]
+shape = SubResource("RectangleShape2D_deep_water")
+
+[node name="WaterVisual" type="Polygon2D" parent="LockedDeepWater" unique_id=476515882]
+color = Color(0.380392, 0.211765, 0.290196, 0.5)
+polygon = PackedVector2Array(-90, -70, 90, -70, 90, 70, -90, 70)
+
+[node name="GrappleStartPlatform" type="StaticBody2D" parent="." unique_id=450828441]
+position = Vector2(5150, 280)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GrappleStartPlatform" unique_id=1379328912]
+shape = SubResource("RectangleShape2D_short_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="GrappleStartPlatform" unique_id=770124665]
+color = Color(0.239216, 0.337255, 0.411765, 1)
+polygon = PackedVector2Array(-48, -10, 48, -10, 48, 10, -48, 10)
+
+[node name="GrappleGapFloor" type="StaticBody2D" parent="." unique_id=233653470]
+position = Vector2(5330, 360)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GrappleGapFloor" unique_id=1176736302]
+shape = SubResource("RectangleShape2D_basin_floor")
+
+[node name="FloorVisual" type="Polygon2D" parent="GrappleGapFloor" unique_id=300806757]
+color = Color(0.164706, 0.188235, 0.223529, 1)
+polygon = PackedVector2Array(-110, -10, 110, -10, 110, 10, -110, 10)
+
+[node name="GrappleLandingPlatform" type="StaticBody2D" parent="." unique_id=1517370376]
+position = Vector2(5530, 220)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GrappleLandingPlatform" unique_id=1550367806]
+shape = SubResource("RectangleShape2D_tall_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="GrappleLandingPlatform" unique_id=14762304]
+color = Color(0.262745, 0.423529, 0.529412, 1)
+polygon = PackedVector2Array(-80, -10, 80, -10, 80, 10, -80, 10)
+
+[node name="GrapplePointA" type="Node2D" parent="." unique_id=1691593746]
+position = Vector2(5330, 130)
+script = ExtResource("4_xm3kw")
+
+[node name="PointVisual" type="Polygon2D" parent="GrapplePointA" unique_id=409158056]
+color = Color(0.964706, 0.835294, 0.352941, 1)
+polygon = PackedVector2Array(0, -12, 12, 0, 0, 12, -12, 0)
+
+[node name="GrapplePointB" type="Node2D" parent="." unique_id=25061297]
+position = Vector2(5480, 120)
+script = ExtResource("4_xm3kw")
+
+[node name="PointVisual" type="Polygon2D" parent="GrapplePointB" unique_id=1297863854]
+color = Color(0.964706, 0.835294, 0.352941, 1)
+polygon = PackedVector2Array(0, -12, 12, 0, 0, 12, -12, 0)
+
+[node name="LockedGrappleStartPlatform" type="StaticBody2D" parent="." unique_id=610472470]
+position = Vector2(5800, 280)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LockedGrappleStartPlatform" unique_id=1608924299]
+shape = SubResource("RectangleShape2D_short_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="LockedGrappleStartPlatform" unique_id=1920125739]
+color = Color(0.329412, 0.25098, 0.309804, 1)
+polygon = PackedVector2Array(-48, -10, 48, -10, 48, 10, -48, 10)
+
+[node name="LockedGrappleGapFloor" type="StaticBody2D" parent="." unique_id=1041018995]
+position = Vector2(5980, 360)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LockedGrappleGapFloor" unique_id=1433779813]
+shape = SubResource("RectangleShape2D_basin_floor")
+
+[node name="FloorVisual" type="Polygon2D" parent="LockedGrappleGapFloor" unique_id=1659628881]
+color = Color(0.211765, 0.168627, 0.203922, 1)
+polygon = PackedVector2Array(-110, -10, 110, -10, 110, 10, -110, 10)
+
+[node name="LockedGrappleLandingPlatform" type="StaticBody2D" parent="." unique_id=2078932216]
+position = Vector2(6180, 220)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LockedGrappleLandingPlatform" unique_id=144172382]
+shape = SubResource("RectangleShape2D_tall_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="LockedGrappleLandingPlatform" unique_id=162748393]
+color = Color(0.447059, 0.262745, 0.337255, 1)
+polygon = PackedVector2Array(-80, -10, 80, -10, 80, 10, -80, 10)
+
+[node name="LockedGrapplePointA" type="Node2D" parent="." unique_id=1933765002]
+position = Vector2(5980, 130)
+script = ExtResource("4_xm3kw")
+
+[node name="PointVisual" type="Polygon2D" parent="LockedGrapplePointA" unique_id=1915203434]
+color = Color(0.909804, 0.454902, 0.486275, 1)
+polygon = PackedVector2Array(0, -12, 12, 0, 0, 12, -12, 0)
+
+[node name="LockedGrapplePointB" type="Node2D" parent="." unique_id=195851103]
+position = Vector2(6130, 120)
+script = ExtResource("4_xm3kw")
+
+[node name="PointVisual" type="Polygon2D" parent="LockedGrapplePointB" unique_id=2046505165]
+color = Color(0.909804, 0.454902, 0.486275, 1)
+polygon = PackedVector2Array(0, -12, 12, 0, 0, 12, -12, 0)
+
+[node name="SpawnMarker" type="Marker2D" parent="." unique_id=1231839622]
+position = Vector2(160, 180)
+
+[node name="DoubleJumpSwitch" type="Area2D" parent="." unique_id=276740800]
+position = Vector2(2500, 236)
+script = ExtResource("5_4sb0k")
+target_path = NodePath("../Player")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DoubleJumpSwitch" unique_id=637347969]
+shape = SubResource("RectangleShape2D_switch")
+
+[node name="Visual" type="Polygon2D" parent="DoubleJumpSwitch" unique_id=581304539]
+color = Color(0.286275, 0.72549, 0.431373, 1)
+polygon = PackedVector2Array(-18, -18, 18, -18, 18, 18, -18, 18)
+
+[node name="Label" type="Label" parent="DoubleJumpSwitch" unique_id=1300268534]
+offset_left = -72.0
+offset_top = -48.0
+offset_right = 72.0
+offset_bottom = -20.0
+theme_override_font_sizes/font_size = 14
+text = "Double Jump: ON"
+
+[node name="SwimSwitch" type="Area2D" parent="." unique_id=1916289270]
+position = Vector2(4220, 190)
+script = ExtResource("5_4sb0k")
+ability_name = "swim"
+target_path = NodePath("../Player")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SwimSwitch" unique_id=817725584]
+shape = SubResource("RectangleShape2D_switch")
+
+[node name="Visual" type="Polygon2D" parent="SwimSwitch" unique_id=257468958]
+color = Color(0.286275, 0.72549, 0.431373, 1)
+polygon = PackedVector2Array(-18, -18, 18, -18, 18, 18, -18, 18)
+
+[node name="Label" type="Label" parent="SwimSwitch" unique_id=46808810]
+offset_left = -52.0
+offset_top = -48.0
+offset_right = 52.0
+offset_bottom = -20.0
+theme_override_font_sizes/font_size = 14
+text = "Swim: ON"
+
+[node name="GrappleSwitch" type="Area2D" parent="." unique_id=1892426494]
+position = Vector2(5130, 236)
+script = ExtResource("5_4sb0k")
+ability_name = "grapple"
+target_path = NodePath("../Player")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GrappleSwitch" unique_id=1012909334]
+shape = SubResource("RectangleShape2D_switch")
+
+[node name="Visual" type="Polygon2D" parent="GrappleSwitch" unique_id=64597722]
+color = Color(0.286275, 0.72549, 0.431373, 1)
+polygon = PackedVector2Array(-18, -18, 18, -18, 18, 18, -18, 18)
+
+[node name="Label" type="Label" parent="GrappleSwitch" unique_id=1507749298]
+offset_left = -60.0
+offset_top = -48.0
+offset_right = 60.0
+offset_bottom = -20.0
+theme_override_font_sizes/font_size = 14
+text = "Grapple: ON"
+
+[node name="LeftWall" type="StaticBody2D" parent="." unique_id=765860908]
+position = Vector2(32, 140)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall" unique_id=47257543]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="WallVisual" type="Polygon2D" parent="LeftWall" unique_id=1570246044]
+color = Color(0.27451, 0.321569, 0.372549, 1)
+polygon = PackedVector2Array(-20, -120, 20, -120, 20, 120, -20, 120)
+
+[node name="RightWall" type="StaticBody2D" parent="." unique_id=580956966]
+position = Vector2(608, 140)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall" unique_id=1687120327]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="WallVisual" type="Polygon2D" parent="RightWall" unique_id=1718078555]
+color = Color(0.27451, 0.321569, 0.372549, 1)
+polygon = PackedVector2Array(-20, -120, 20, -120, 20, 120, -20, 120)
+
+[node name="SectionMarkers" type="Node2D" parent="." unique_id=1967798614]
+
+[node name="Start" type="Marker2D" parent="SectionMarkers" unique_id=1414043081]
+position = Vector2(160, 180)
+
+[node name="StartLabel" type="Label" parent="SectionMarkers/Start" unique_id=997131596]
+offset_left = -72.0
+offset_top = -56.0
+offset_right = 72.0
+offset_bottom = -12.0
+theme_override_font_sizes/font_size = 18
+text = "Start / Ground Move"
+
+[node name="JumpSection" type="Marker2D" parent="SectionMarkers" unique_id=362567130]
+position = Vector2(460, 220)
+
+[node name="JumpLabel" type="Label" parent="SectionMarkers/JumpSection" unique_id=332977253]
+offset_left = -68.0
+offset_top = -60.0
+offset_right = 68.0
+offset_bottom = -12.0
+theme_override_font_sizes/font_size = 18
+text = "Jump / Buffer / Coyote"
+
+[node name="GapDashSection" type="Marker2D" parent="SectionMarkers" unique_id=1844015226]
+position = Vector2(1120, 220)
+
+[node name="GapDashLabel" type="Label" parent="SectionMarkers/GapDashSection" unique_id=462223484]
+offset_left = -56.0
+offset_top = -60.0
+offset_right = 56.0
+offset_bottom = -12.0
+theme_override_font_sizes/font_size = 18
+text = "Dash / Gap"
+
+[node name="LedgeSection" type="Marker2D" parent="SectionMarkers" unique_id=966383337]
+position = Vector2(1480, 180)
+
+[node name="LedgeLabel" type="Label" parent="SectionMarkers/LedgeSection" unique_id=554272102]
+offset_left = -84.0
+offset_top = -60.0
+offset_right = 84.0
+offset_bottom = -12.0
+theme_override_font_sizes/font_size = 18
+text = "Edge Idle / Edge Climb"
+
+[node name="TunnelSection" type="Marker2D" parent="SectionMarkers" unique_id=1730688463]
+position = Vector2(1760, 220)
+
+[node name="TunnelLabel" type="Label" parent="SectionMarkers/TunnelSection" unique_id=715811284]
+offset_left = -60.0
+offset_top = -60.0
+offset_right = 60.0
+offset_bottom = -12.0
+theme_override_font_sizes/font_size = 18
+text = "Low Tunnel"
+
+[node name="WallJumpSection" type="Marker2D" parent="SectionMarkers" unique_id=1106426710]
+position = Vector2(2210, 120)
+
+[node name="WallJumpLabel" type="Label" parent="SectionMarkers/WallJumpSection" unique_id=1786242958]
+offset_left = -64.0
+offset_top = -72.0
+offset_right = 64.0
+offset_bottom = -24.0
+theme_override_font_sizes/font_size = 18
+text = "Wall Slide / Wall Jump"
+
+[node name="DoubleJumpSection" type="Marker2D" parent="SectionMarkers" unique_id=946885627]
+position = Vector2(2750, 188)
+
+[node name="DoubleJumpLabel" type="Label" parent="SectionMarkers/DoubleJumpSection" unique_id=1360134459]
+offset_left = -56.0
+offset_top = -60.0
+offset_right = 56.0
+offset_bottom = -12.0
+theme_override_font_sizes/font_size = 18
+text = "Double Jump"
+
+[node name="CrouchSection" type="Marker2D" parent="SectionMarkers" unique_id=113320507]
+position = Vector2(3340, 220)
+
+[node name="CrouchLabel" type="Label" parent="SectionMarkers/CrouchSection" unique_id=556927996]
+offset_left = -64.0
+offset_top = -60.0
+offset_right = 64.0
+offset_bottom = -12.0
+theme_override_font_sizes/font_size = 18
+text = "Crouch / Crouch Dash"
+
+[node name="ShallowWaterSection" type="Marker2D" parent="SectionMarkers" unique_id=1938795382]
+position = Vector2(3860, 284)
+
+[node name="ShallowWaterLabel" type="Label" parent="SectionMarkers/ShallowWaterSection" unique_id=120903843]
+offset_left = -60.0
+offset_top = -72.0
+offset_right = 60.0
+offset_bottom = -24.0
+theme_override_font_sizes/font_size = 18
+text = "Shallow Water / Slow"
+
+[node name="SwimSection" type="Marker2D" parent="SectionMarkers" unique_id=1261982399]
+position = Vector2(4300, 280)
+
+[node name="SwimLabel" type="Label" parent="SectionMarkers/SwimSection" unique_id=1801923844]
+offset_left = -64.0
+offset_top = -72.0
+offset_right = 64.0
+offset_bottom = -24.0
+theme_override_font_sizes/font_size = 18
+text = "Swim Baseline"
+
+[node name="LockedSwimSection" type="Marker2D" parent="SectionMarkers" unique_id=945632151]
+position = Vector2(4760, 280)
+
+[node name="LockedSwimLabel" type="Label" parent="SectionMarkers/LockedSwimSection" unique_id=1994025642]
+offset_left = -72.0
+offset_top = -72.0
+offset_right = 72.0
+offset_bottom = -24.0
+theme_override_font_sizes/font_size = 18
+text = "Locked Swim / Respawn"
+
+[node name="GrappleSection" type="Marker2D" parent="SectionMarkers" unique_id=123738468]
+position = Vector2(5330, 200)
+
+[node name="GrappleLabel" type="Label" parent="SectionMarkers/GrappleSection" unique_id=102871719]
+offset_left = -76.0
+offset_top = -72.0
+offset_right = 76.0
+offset_bottom = -24.0
+theme_override_font_sizes/font_size = 18
+text = "Grapple / Fixed Points"
+
+[node name="LockedGrappleSection" type="Marker2D" parent="SectionMarkers" unique_id=792756404]
+position = Vector2(5980, 200)
+
+[node name="LockedGrappleLabel" type="Label" parent="SectionMarkers/LockedGrappleSection" unique_id=482794655]
+offset_left = -84.0
+offset_top = -72.0
+offset_right = 84.0
+offset_bottom = -24.0
+theme_override_font_sizes/font_size = 18
+text = "Locked Grapple / Fail"
+
+[node name="PlayerDebugHud" type="CanvasLayer" parent="." unique_id=574090769]
+script = ExtResource("2_d0p0w")
+target_path = NodePath("../Player")
+
+[node name="PanelContainer" type="PanelContainer" parent="PlayerDebugHud" unique_id=1082907200]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 228.0
+offset_bottom = 210.0
+
+[node name="MarginContainer" type="MarginContainer" parent="PlayerDebugHud/PanelContainer" unique_id=2106790342]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="DebugLabel" type="Label" parent="PlayerDebugHud/PanelContainer/MarginContainer" unique_id=161824407]
+layout_mode = 2
+text = "Locomotion Debug"

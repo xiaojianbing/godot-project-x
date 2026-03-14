@@ -1,0 +1,57 @@
+[gd_scene load_steps=7 format=3 uid="uid://bjqwhnq4el5mm"]
+
+[ext_resource type="Script" path="res://scripts/player/player_test_actor.gd" id="1_hhbmx"]
+[ext_resource type="Resource" path="res://resources/characters/player_combat_profile.tres" id="2_x3g8n"]
+[ext_resource type="Resource" path="res://resources/characters/player_motion_profile.tres" id="3_yq2w7"]
+[ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="4_ykmbn"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(18, 30)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hurtbox"]
+size = Vector2(18, 30)
+
+[node name="PlayerTestActor" type="CharacterBody2D"]
+script = ExtResource("1_hhbmx")
+combat_profile = ExtResource("2_x3g8n")
+motion_profile = ExtResource("3_yq2w7")
+
+[node name="SpriteRoot" type="Node2D" parent="."]
+
+[node name="BodyVisual" type="Polygon2D" parent="SpriteRoot"]
+color = Color(0.294118, 0.686275, 0.901961, 1)
+polygon = PackedVector2Array(-9, -15, 9, -15, 9, 15, -9, 15)
+
+[node name="FollowCamera" type="Camera2D" parent="."]
+position = Vector2(0, -24)
+enabled = true
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_body")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("RectangleShape2D_hurtbox")
+
+[node name="HitboxAnchor" type="Node2D" parent="."]
+
+[node name="HeadRay" type="RayCast2D" parent="."]
+position = Vector2(0, -14)
+target_position = Vector2(0, -8)
+enabled = true
+
+[node name="LedgeRayForward" type="RayCast2D" parent="."]
+position = Vector2(10, -8)
+target_position = Vector2(8, 0)
+enabled = true
+
+[node name="LedgeRayDown" type="RayCast2D" parent="."]
+position = Vector2(18, -24)
+target_position = Vector2(0, 24)
+enabled = true
+
+[node name="PlayerController" type="Node" parent="."]
+script = ExtResource("4_ykmbn")
