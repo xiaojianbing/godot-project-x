@@ -20,6 +20,8 @@ func evaluate(
 	motion_profile: CharacterMotionProfile,
 	attack_cycle_remaining: float,
 	projectile_cycle_remaining: float,
+	allow_melee: bool,
+	allow_projectile: bool,
 	delta: float
 ) -> Dictionary:
 	if player == null:
@@ -37,14 +39,14 @@ func evaluate(
 			"start_melee": false,
 			"start_projectile": false,
 		}
-	if attack_cycle_remaining <= 0.0 and distance <= melee_range:
+	if allow_melee and attack_cycle_remaining <= 0.0 and distance <= melee_range:
 		return {
 			"velocity_x": 0.0,
 			"action_tag": &"enemy_attack",
 			"start_melee": true,
 			"start_projectile": false,
 		}
-	if projectile_cycle_remaining <= 0.0 and distance > melee_range and distance <= aggro_range:
+	if allow_projectile and projectile_cycle_remaining <= 0.0 and distance > melee_range and distance <= aggro_range:
 		return {
 			"velocity_x": 0.0,
 			"action_tag": &"enemy_projectile",

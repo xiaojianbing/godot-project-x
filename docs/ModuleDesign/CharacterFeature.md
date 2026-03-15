@@ -52,6 +52,7 @@
 Character Scene
 -> CharacterBody2D / Node2D Root
 -> CharacterContext
+   -> CharacterAttributeSet
    -> CharacterStats
    -> CharacterSignals
    -> CharacterCombatProfile
@@ -63,6 +64,7 @@ Character Scene
 说明：
 
 - `CharacterStats` 是基础数值核心。
+- `CharacterAttributeSet` 是基础属性真相与最终值查询中心。
 - `CharacterSignals` 是运行时状态快照，不保存长期数值。
 - `CharacterCombatProfile` 和 `CharacterMotionProfile` 是静态配置入口。
 - `DamageReceiver` 是统一受击入口，负责把命中数据送入数值层，再把结果交给行为层。
@@ -176,13 +178,15 @@ Character Scene
 
 ### 8.1 `CharacterCombatProfile`
 
-用于描述战斗相关默认属性：
+用于描述战斗相关默认参数：
 
-- 基础 HP / Energy
-- 攻击成长基线
-- 受击抗性
-- 霸体阈值
-- 击退抗性
+- 攻击 hitbox
+- 命中硬直与击退
+- guard / parry 参数
+- projectile 参数
+- enemy 攻击节奏参数
+
+> 基础 HP / Energy / Attack / Defense 等角色属性已不建议继续长期放在 `CharacterCombatProfile` 中，后续应迁往独立的 `CharacterAttributes` 模块。
 
 ### 8.2 `CharacterMotionProfile`
 
@@ -207,8 +211,8 @@ Character Scene
 | --- | --- | --- |
 | 当前 HP / Energy | `CharacterStats` | 运行时频繁变化 |
 | Buff 列表 | `CharacterStats` | 运行时结算核心 |
-| 基础最大 HP | `CharacterCombatProfile` | 静态配置，可复用 |
-| 基础受击抗性 | `CharacterCombatProfile` | 静态配置，可平衡 |
+| 基础最大 HP | `CharacterAttributesProfile` | 角色基础属性模板 |
+| 基础受击抗性 | `CharacterAttributesProfile` | 角色基础属性模板 |
 | 基础移动倍率 | `CharacterMotionProfile` | 不和 HP 系统耦合 |
 | 当前是否无敌 | `CharacterSignals` | 行为态，不是永久属性 |
 | 当前是否可输入 | `CharacterSignals` | 行为态，不是属性值 |

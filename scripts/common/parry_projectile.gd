@@ -126,6 +126,6 @@ func _update_visual_style() -> void:
 	if _visual == null:
 		return
 	if owner_team == &"player":
-		_visual.color = Color(0.38, 0.92, 1.0, 1.0)
+		_visual.color = Color(0.36, 0.94, 0.48, 1.0)
 		return
-	_visual.color = Color(1.0, 0.56, 0.24, 1.0)
+	_visual.color = Color(1.0, 0.42, 0.2, 1.0)

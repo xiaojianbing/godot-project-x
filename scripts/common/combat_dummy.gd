@@ -3,6 +3,7 @@ extends Node2D
 
 
 @export var combat_profile: CharacterCombatProfile
+@export var attributes_profile: Resource
 @export var player_path: NodePath
 @export var projectile_scene: PackedScene
 @export var contact_damage: float = 14.0
@@ -32,8 +33,11 @@ func _ready() -> void:
 	_spawn_position = global_position
 	if combat_profile == null:
 		combat_profile = CharacterCombatProfile.new()
-	stats.configure_from_profile(combat_profile)
-	context.setup(self, stats, signals, combat_profile, null)
+	if attributes_profile != null:
+		stats.configure_from_attributes_profile(attributes_profile)
+	else:
+		stats.configure_from_profile(combat_profile)
+	context.setup(self, stats, signals, combat_profile, null, null, attributes_profile, stats.attribute_set)
 	damage_receiver.setup(context)
 	damage_receiver.hurt_requested.connect(_on_hurt_requested)
 	damage_receiver.death_requested.connect(_on_death_requested)
@@ -82,7 +86,7 @@ func receive_player_attack(hit_data: Dictionary) -> DamageResult:
 func respawn_at(target_position: Vector2) -> void:
 	global_position = target_position
 	_spawn_position = target_position
-	stats.current_hp = stats.max_hp
+	stats.apply_respawn_resource_values()
 	signals.is_dead = false
 	signals.can_accept_input = true
 	signals.is_invincible = false

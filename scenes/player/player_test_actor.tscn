@@ -1,13 +1,14 @@
-[gd_scene load_steps=10 format=3 uid="uid://bjqwhnq4el5mm"]
+[gd_scene format=3 uid="uid://bjqwhnq4el5mm"]
 
-[ext_resource type="Script" path="res://scripts/player/player_test_actor.gd" id="1_hhbmx"]
-[ext_resource type="Resource" path="res://resources/characters/player_combat_profile.tres" id="2_x3g8n"]
-[ext_resource type="Resource" path="res://resources/characters/player_motion_profile.tres" id="3_yq2w7"]
-[ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="4_ykmbn"]
-[ext_resource type="Script" path="res://scripts/common/area_debug_outline.gd" id="5_h7m2b"]
-[ext_resource type="Script" path="res://scripts/common/world_health_bar.gd" id="6_g8s3t"]
-[ext_resource type="Script" path="res://scripts/common/state_outline_2d.gd" id="7_m1t2q"]
-[ext_resource type="Script" path="res://scripts/common/aim_guide_2d.gd" id="8_t9gs1"]
+[ext_resource type="Script" uid="uid://marilvv0uwty" path="res://scripts/player/player_test_actor.gd" id="1_hhbmx"]
+[ext_resource type="Resource" uid="uid://bntrijwy7x2rj" path="res://resources/characters/player_combat_profile.tres" id="2_x3g8n"]
+[ext_resource type="Resource" uid="uid://cicunvu4oc2dp" path="res://resources/characters/player_motion_profile.tres" id="3_yq2w7"]
+[ext_resource type="Resource" path="res://resources/characters/player_attributes_profile.tres" id="3_yq2w8"]
+[ext_resource type="Script" uid="uid://c7emub4n0bqrq" path="res://scripts/player/player_controller.gd" id="4_ykmbn"]
+[ext_resource type="Script" uid="uid://d0p2qgn4erxou" path="res://scripts/common/area_debug_outline.gd" id="5_h7m2b"]
+[ext_resource type="Script" uid="uid://c50vcrybpk0ht" path="res://scripts/common/world_health_bar.gd" id="6_g8s3t"]
+[ext_resource type="Script" uid="uid://dlf05c1oieein" path="res://scripts/common/state_outline_2d.gd" id="7_m1t2q"]
+[ext_resource type="Script" uid="uid://b8467gsr0ua8e" path="res://scripts/common/aim_guide_2d.gd" id="8_t9gs1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(18, 30)
@@ -18,72 +19,77 @@ size = Vector2(18, 30)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_attack_hitbox"]
 size = Vector2(22, 18)
 
-[node name="PlayerTestActor" type="CharacterBody2D"]
+[node name="PlayerTestActor" type="CharacterBody2D" unique_id=643703502]
+collision_layer = 2
+collision_mask = 5
 script = ExtResource("1_hhbmx")
 combat_profile = ExtResource("2_x3g8n")
 motion_profile = ExtResource("3_yq2w7")
-collision_layer = 2
-collision_mask = 5
+attributes_profile = ExtResource("3_yq2w8")
 
-[node name="SpriteRoot" type="Node2D" parent="."]
+[node name="SpriteRoot" type="Node2D" parent="." unique_id=883512532]
 
-[node name="BodyVisual" type="Polygon2D" parent="SpriteRoot"]
+[node name="BodyVisual" type="Polygon2D" parent="SpriteRoot" unique_id=1691988475]
 color = Color(0.294118, 0.686275, 0.901961, 1)
 polygon = PackedVector2Array(-9, -15, 9, -15, 9, 15, -9, 15)
 
-[node name="GuardOutline" type="Node2D" parent="."]
+[node name="BodyOutline" type="Node2D" parent="." unique_id=402105878]
 script = ExtResource("7_m1t2q")
-outline_size = Vector2(26, 38)
-outline_color = Color(0.4, 1, 0.82, 0.95)
+outline_size = Vector2(24, 34)
+front_outline_color = Color(0.36, 0.94, 0.48, 0.95)
+back_outline_color = Color(0.2, 0.72, 0.9, 0.9)
+use_facing_colors = true
 
-[node name="AimGuide" type="Node2D" parent="."]
-script = ExtResource("8_t9gs1")
+[node name="GuardOutline" type="Node2D" parent="." unique_id=14604791]
+script = ExtResource("7_m1t2q")
+outline_color = Color(0.4, 1, 0.82, 0.95)
+front_only = true
+
+[node name="AimGuide" type="Node2D" parent="." unique_id=268068901]
 position = Vector2(0, -8)
+script = ExtResource("8_t9gs1")
 guide_length = 42.0
 
-[node name="FollowCamera" type="Camera2D" parent="."]
+[node name="FollowCamera" type="Camera2D" parent="." unique_id=1841472663]
 position = Vector2(0, -24)
-enabled = true
-position_smoothing_enabled = true
-position_smoothing_speed = 8.0
+zoom = Vector2(2, 2)
+process_callback = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=528835157]
 shape = SubResource("RectangleShape2D_body")
 
-[node name="Hurtbox" type="Area2D" parent="."]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=336299018]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=1400134407]
 shape = SubResource("RectangleShape2D_hurtbox")
 
-[node name="HitboxAnchor" type="Node2D" parent="."]
+[node name="HitboxAnchor" type="Node2D" parent="." unique_id=1266853647]
 
-[node name="AttackHitbox" type="Area2D" parent="HitboxAnchor"]
-script = ExtResource("5_h7m2b")
+[node name="AttackHitbox" type="Area2D" parent="HitboxAnchor" unique_id=395377357]
 monitoring = false
 monitorable = false
+script = ExtResource("5_h7m2b")
+outline_color = Color(0.36, 0.94, 0.48, 0.95)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxAnchor/AttackHitbox"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxAnchor/AttackHitbox" unique_id=728361040]
 shape = SubResource("RectangleShape2D_attack_hitbox")
 
-[node name="HeadRay" type="RayCast2D" parent="."]
+[node name="HeadRay" type="RayCast2D" parent="." unique_id=843982105]
 position = Vector2(0, -14)
 target_position = Vector2(0, -8)
-enabled = true
 
-[node name="LedgeRayForward" type="RayCast2D" parent="."]
+[node name="LedgeRayForward" type="RayCast2D" parent="." unique_id=899011943]
 position = Vector2(10, -8)
 target_position = Vector2(8, 0)
-enabled = true
 
-[node name="LedgeRayDown" type="RayCast2D" parent="."]
+[node name="LedgeRayDown" type="RayCast2D" parent="." unique_id=884615708]
 position = Vector2(18, -24)
 target_position = Vector2(0, 24)
-enabled = true
 
-[node name="PlayerController" type="Node" parent="."]
+[node name="PlayerController" type="Node" parent="." unique_id=525265282]
 script = ExtResource("4_ykmbn")
 
-[node name="HealthBar" type="Node2D" parent="."]
+[node name="HealthBar" type="Node2D" parent="." unique_id=1119996934]
 script = ExtResource("6_g8s3t")
 target_path = NodePath("..")
 bar_offset = Vector2(-20, -40)

@@ -1,102 +1,222 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene format=3 uid="uid://ccuqs1jgkxitd"]
 
-[ext_resource type="PackedScene" path="res://scenes/player/player_test_actor.tscn" id="1_wa7p0"]
+[ext_resource type="PackedScene" uid="uid://bjqwhnq4el5mm" path="res://scenes/player/player_test_actor.tscn" id="1_wa7p0"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/enemy_character.tscn" id="2_j1l0v"]
-[ext_resource type="Script" path="res://scripts/ui/player_debug_hud.gd" id="3_b2uwp"]
-[ext_resource type="Script" path="res://scripts/testrooms/combat_foundation_test_room.gd" id="4_5tlq1"]
+[ext_resource type="Script" uid="uid://dj37kpfxnvs55" path="res://scripts/ui/player_debug_hud.gd" id="3_b2uwp"]
+[ext_resource type="Script" uid="uid://bgfsbnm11jpuu" path="res://scripts/testrooms/auto_rect_visual.gd" id="3_h5vs5"]
+[ext_resource type="Script" uid="uid://c7m3s1nm3d3ww" path="res://scripts/testrooms/combat_foundation_test_room.gd" id="4_5tlq1"]
+[ext_resource type="PackedScene" path="res://scenes/common/projectile_emitter_trap.tscn" id="5_2nrgq"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
-size = Vector2(760, 40)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
-size = Vector2(180, 20)
+size = Vector2(3400, 40)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
-size = Vector2(40, 240)
+size = Vector2(40, 1080)
 
-[node name="CombatFoundationTestRoom" type="Node2D"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_divider_wall_01"]
+size = Vector2(40, 180)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_divider_wall_02"]
+size = Vector2(40, 180)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_divider_wall_03"]
+size = Vector2(40, 180)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform_air_start"]
+size = Vector2(260, 20)
+
+[node name="CombatFoundationTestRoom" type="Node2D" unique_id=753931883]
 script = ExtResource("4_5tlq1")
 
-[node name="Player" parent="." instance=ExtResource("1_wa7p0")]
-position = Vector2(140, 180)
+[node name="Player" parent="." unique_id=1901268753 instance=ExtResource("1_wa7p0")]
+position = Vector2(160, 478)
 
-[node name="Ground" type="StaticBody2D" parent="."]
-position = Vector2(380, 320)
+[node name="Ground" type="StaticBody2D" parent="." unique_id=1500585206]
+position = Vector2(1700, 540)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground" unique_id=1007730935]
 shape = SubResource("RectangleShape2D_ground")
 
-[node name="Visual" type="Polygon2D" parent="Ground"]
+[node name="Visual" type="Polygon2D" parent="Ground" unique_id=2045057963]
 color = Color(0.180392, 0.203922, 0.25098, 1)
-polygon = PackedVector2Array(-380, -20, 380, -20, 380, 20, -380, 20)
+polygon = PackedVector2Array(-1700, -20, 1700, -20, 1700, 20, -1700, 20)
+script = ExtResource("3_h5vs5")
 
-[node name="AirParryPlatform" type="StaticBody2D" parent="."]
-position = Vector2(250, 210)
+[node name="LeftWall" type="StaticBody2D" parent="." unique_id=1889910908]
+position = Vector2(20, 0)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="AirParryPlatform"]
-shape = SubResource("RectangleShape2D_platform")
-
-[node name="Visual" type="Polygon2D" parent="AirParryPlatform"]
-color = Color(0.266667, 0.376471, 0.466667, 1)
-polygon = PackedVector2Array(-90, -10, 90, -10, 90, 10, -90, 10)
-
-[node name="LeftWall" type="StaticBody2D" parent="."]
-position = Vector2(24, 200)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall" unique_id=423993092]
 shape = SubResource("RectangleShape2D_wall")
 
-[node name="Visual" type="Polygon2D" parent="LeftWall"]
+[node name="Visual" type="Polygon2D" parent="LeftWall" unique_id=2063126929]
 color = Color(0.180392, 0.203922, 0.25098, 1)
-polygon = PackedVector2Array(-20, -120, 20, -120, 20, 120, -20, 120)
+polygon = PackedVector2Array(-20, -540, 20, -540, 20, 540, -20, 540)
+script = ExtResource("3_h5vs5")
 
-[node name="MeleeDummy" parent="." instance=ExtResource("2_j1l0v")]
-position = Vector2(520, 282)
-player_path = NodePath("../Player")
+[node name="DividerWall01" type="StaticBody2D" parent="." unique_id=938022323]
+position = Vector2(860, 0)
 
-[node name="ProjectileDummy" parent="." instance=ExtResource("2_j1l0v")]
-position = Vector2(650, 182)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DividerWall01" unique_id=1349997029]
+position = Vector2(0, 450)
+shape = SubResource("RectangleShape2D_divider_wall_01")
+
+[node name="Visual" type="Polygon2D" parent="DividerWall01" unique_id=184731947]
+position = Vector2(0, 450)
+color = Color(0.180392, 0.203922, 0.25098, 1)
+polygon = PackedVector2Array(-20, -90, 20, -90, 20, 90, -20, 90)
+script = ExtResource("3_h5vs5")
+
+[node name="DividerWall02" type="StaticBody2D" parent="." unique_id=1536820670]
+position = Vector2(1700, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DividerWall02" unique_id=130459638]
+position = Vector2(0, 450)
+shape = SubResource("RectangleShape2D_divider_wall_02")
+
+[node name="Visual" type="Polygon2D" parent="DividerWall02" unique_id=1868160255]
+position = Vector2(0, 450)
+color = Color(0.180392, 0.203922, 0.25098, 1)
+polygon = PackedVector2Array(-20, -90, 20, -90, 20, 90, -20, 90)
+script = ExtResource("3_h5vs5")
+
+[node name="DividerWall03" type="StaticBody2D" parent="." unique_id=689108795]
+position = Vector2(2540, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DividerWall03" unique_id=922067549]
+position = Vector2(0, 450)
+shape = SubResource("RectangleShape2D_divider_wall_03")
+
+[node name="Visual" type="Polygon2D" parent="DividerWall03" unique_id=1199366301]
+position = Vector2(0, 450)
+color = Color(0.180392, 0.203922, 0.25098, 1)
+polygon = PackedVector2Array(-20, -90, 20, -90, 20, 90, -20, 90)
+script = ExtResource("3_h5vs5")
+
+[node name="RightWall" type="StaticBody2D" parent="." unique_id=1762685843]
+position = Vector2(3380, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall" unique_id=993737268]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="Visual" type="Polygon2D" parent="RightWall" unique_id=1140828684]
+color = Color(0.180392, 0.203922, 0.25098, 1)
+polygon = PackedVector2Array(-20, -540, 20, -540, 20, 540, -20, 540)
+script = ExtResource("3_h5vs5")
+
+[node name="AirParryPlatformStart" type="StaticBody2D" parent="." unique_id=1275063017]
+position = Vector2(2810, 420)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AirParryPlatformStart" unique_id=432696066]
+shape = SubResource("RectangleShape2D_platform_air_start")
+
+[node name="Visual" type="Polygon2D" parent="AirParryPlatformStart" unique_id=758638333]
+color = Color(0.266667, 0.376471, 0.466667, 1)
+polygon = PackedVector2Array(-130, -10, 130, -10, 130, 10, -130, 10)
+script = ExtResource("3_h5vs5")
+
+[node name="ProjectileDummy" parent="." unique_id=100793740 instance=ExtResource("2_j1l0v")]
+position = Vector2(620, 502)
 player_path = NodePath("../Player")
 contact_damage = 10.0
-projectile_damage = 12.0
+aggro_range = 620.0
+preferred_range = 320.0
+allow_melee_attack = false
 
-[node name="SectionMarkers" type="Node2D" parent="."]
+[node name="MeleeDummy" parent="." unique_id=586355661 instance=ExtResource("2_j1l0v")]
+position = Vector2(1460, 502)
+player_path = NodePath("../Player")
+aggro_range = 340.0
+melee_range = 96.0
+allow_projectile_attack = false
 
-[node name="StartLabel" type="Label" parent="SectionMarkers"]
-position = Vector2(104, 96)
+[node name="ChainTrapTop" parent="." unique_id=183947280 instance=ExtResource("5_2nrgq")]
+position = Vector2(2300, 350)
+target_path = NodePath("../Player")
+projectile_speed = 280.0
+fire_interval = 2.8
+initial_delay = 0.7
+
+[node name="ChainTrapBottom" parent="." unique_id=742543061 instance=ExtResource("5_2nrgq")]
+position = Vector2(2300, 470)
+target_path = NodePath("../Player")
+projectile_speed = 280.0
+fire_interval = 2.8
+initial_delay = 0.76
+
+[node name="AirParryTrap" parent="." unique_id=1733156738 instance=ExtResource("5_2nrgq")]
+position = Vector2(3280, 140)
+target_path = NodePath("../Player")
+projectile_speed = 250.0
+fire_interval = 2.4
+initial_delay = 1.1
+
+[node name="SectionMarkers" type="Node2D" parent="." unique_id=789835157]
+
+[node name="StartLabel" type="Label" parent="SectionMarkers" unique_id=1536868048]
+offset_left = 32.0
+offset_top = 24.0
+offset_right = 360.0
+offset_bottom = 52.0
 theme_override_font_sizes/font_size = 18
 text = "P0-B Combat Foundation"
 
-[node name="GuardLabel" type="Label" parent="SectionMarkers"]
-position = Vector2(438, 114)
-theme_override_font_sizes/font_size = 16
-text = "Ground Attack / Guard / Ground Parry"
-
-[node name="AirParryLabel" type="Label" parent="SectionMarkers"]
-position = Vector2(560, 48)
-theme_override_font_sizes/font_size = 16
-text = "Projectile / Air Parry"
-
-[node name="InputLabel" type="Label" parent="SectionMarkers"]
-position = Vector2(92, 126)
+[node name="InputLabel" type="Label" parent="SectionMarkers" unique_id=980568858]
+offset_left = 32.0
+offset_top = 58.0
+offset_right = 760.0
+offset_bottom = 82.0
 theme_override_font_sizes/font_size = 14
 text = "Light: F / X  Heavy: G / Y  Shoot: R / B  Guard: L / RShoulder  Reset: T / Back"
 
-[node name="PlayerDebugHud" type="CanvasLayer" parent="."]
+[node name="ShootLabel" type="Label" parent="SectionMarkers" unique_id=1319893615]
+offset_left = 170.0
+offset_top = 80.0
+offset_right = 670.0
+offset_bottom = 110.0
+theme_override_font_sizes/font_size = 20
+text = "Section 1 / Width 800 - Shoot"
+
+[node name="MeleeLabel" type="Label" parent="SectionMarkers" unique_id=615284179]
+offset_left = 1010.0
+offset_top = 80.0
+offset_right = 1560.0
+offset_bottom = 110.0
+theme_override_font_sizes/font_size = 20
+text = "Section 2 / Width 800 - Melee"
+
+[node name="ChainLabel" type="Label" parent="SectionMarkers" unique_id=492955069]
+offset_left = 1780.0
+offset_top = 80.0
+offset_right = 2500.0
+offset_bottom = 110.0
+theme_override_font_sizes/font_size = 20
+text = "Section 3 / Width 800 - Dual Projectile Parry"
+
+[node name="AirLabel" type="Label" parent="SectionMarkers" unique_id=825426157]
+offset_left = 2720.0
+offset_top = 80.0
+offset_right = 3320.0
+offset_bottom = 110.0
+theme_override_font_sizes/font_size = 20
+text = "Section 4 / Width 800 - Air Parry"
+
+[node name="PlayerDebugHud" type="CanvasLayer" parent="." unique_id=2061373341]
 script = ExtResource("3_b2uwp")
 target_path = NodePath("../Player")
 
-[node name="PanelContainer" type="PanelContainer" parent="PlayerDebugHud"]
+[node name="PanelContainer" type="PanelContainer" parent="PlayerDebugHud" unique_id=775283687]
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 252.0
 offset_bottom = 252.0
 
-[node name="MarginContainer" type="MarginContainer" parent="PlayerDebugHud/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="PlayerDebugHud/PanelContainer" unique_id=1205112761]
+layout_mode = 2
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="DebugLabel" type="Label" parent="PlayerDebugHud/PanelContainer/MarginContainer"]
+[node name="DebugLabel" type="Label" parent="PlayerDebugHud/PanelContainer/MarginContainer" unique_id=1497686374]
+layout_mode = 2
 text = "Combat Debug"

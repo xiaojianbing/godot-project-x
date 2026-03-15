@@ -4,8 +4,6 @@
 
 [resource]
 script = ExtResource("1_7pp1a")
-base_max_hp = 72.0
-base_attack_power = 10.0
 hurt_invincible_duration = 0.0
 hurt_knockback_ground = Vector2(78, -54)
 hurt_knockback_projectile = Vector2(92, -68)
@@ -19,3 +17,9 @@ heavy_attack_knockback = Vector2(120, -28)
 shoot_knockback = Vector2(80, -20)
 shoot_projectile_speed = 220.0
 shoot_projectile_lifetime = 2.6
+enemy_melee_windup_duration = 0.12
+enemy_melee_active_duration = 0.16
+enemy_melee_cooldown_duration = 1.2
+enemy_projectile_windup_duration = 0.08
+enemy_projectile_cooldown_duration = 2.0
+enemy_projectile_spawn_offset = Vector2(18, -10)

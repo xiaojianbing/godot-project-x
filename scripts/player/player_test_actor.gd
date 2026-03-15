@@ -7,10 +7,13 @@ const DASH_AFTERIMAGE_SCRIPT := preload("res://scripts/common/dash_afterimage.gd
 const WORLD_COLLISION_MASK := 1
 const ENEMY_BODY_COLLISION_MASK := 4
 const PLAYER_DEFAULT_COLLISION_MASK := WORLD_COLLISION_MASK | ENEMY_BODY_COLLISION_MASK
+const LIGHT_ATTACK_OUTLINE_COLOR := Color(0.36, 0.94, 0.48, 0.95)
+const HEAVY_ATTACK_OUTLINE_COLOR := Color(0.14, 0.96, 0.76, 0.98)
 
 
 @export var combat_profile: CharacterCombatProfile
 @export var motion_profile: CharacterMotionProfile
+@export var attributes_profile: Resource
 @export var double_jump_unlocked: bool = true
 @export var swim_unlocked: bool = true
 @export var grapple_unlocked: bool = true
@@ -72,6 +75,7 @@ var _active_attack_action: StringName = &"attack_light"
 @onready var _hurtbox: Area2D = $Hurtbox
 @onready var _hurtbox_shape: CollisionShape2D = $Hurtbox/CollisionShape2D
 @onready var _sprite_root: Node2D = $SpriteRoot
+@onready var _body_outline: StateOutline2D = $BodyOutline
 @onready var _guard_outline: StateOutline2D = $GuardOutline
 @onready var _aim_guide: AimGuide2D = $AimGuide
 @onready var _attack_hitbox: Area2D = $HitboxAnchor/AttackHitbox
@@ -242,10 +246,13 @@ func _action_has_joy_button(action_name: StringName, button_index: JoyButton) ->
 func _setup_character_foundation() -> void:
 	_ensure_runtime_nodes()
 	stats = CharacterStats.new()
-	stats.configure_from_profile(combat_profile)
+	if attributes_profile != null:
+		stats.configure_from_attributes_profile(attributes_profile)
+	else:
+		stats.configure_from_profile(combat_profile)
 	signals = CharacterSignals.new()
 	context = CharacterContext.new()
-	context.setup(self, stats, signals, combat_profile, motion_profile)
+	context.setup(self, stats, signals, combat_profile, motion_profile, null, attributes_profile, stats.attribute_set)
 	collision_mask = PLAYER_DEFAULT_COLLISION_MASK
 	damage_receiver = DamageReceiver.new()
 	damage_receiver.setup(context)
@@ -627,6 +634,7 @@ func _update_runtime_signals() -> void:
 		_is_crouch_dashing = false
 	_update_dash_collision_state()
 	_update_dash_afterimage()
+	_update_body_outline()
 	_update_guard_outline()
 	_update_player_visual_state()
 	if signals.is_dead:
@@ -669,8 +677,8 @@ func _update_combat_runtime(_delta: float) -> void:
 	if _attack_hitbox == null:
 		return
 	_update_shoot_aim_state()
-	var facing := float(signs_to_int(signals.facing_direction if signals != null else 1))
-	$HitboxAnchor.position = Vector2(14.0 * facing, -4.0)
+	_update_attack_hitbox_shape()
+	_update_attack_hitbox_visual()
 	if _attack_active_remaining > 0.0:
 		_attack_hitbox.monitoring = true
 		_process_attack_hits()
@@ -751,7 +759,7 @@ func _spawn_player_projectile() -> void:
 	var shoot_direction := _get_shoot_direction()
 	projectile.global_position = global_position + shoot_direction * 18.0
 	projectile.set_owner_team(&"player")
-	projectile.damage = (stats.attack_power if stats != null else combat_profile.base_attack_power) * combat_profile.shoot_damage_scale
+	projectile.damage = (stats.get_attribute_value(&"attack_power", 10.0) if stats != null else 10.0) * combat_profile.shoot_damage_scale
 	projectile.hitstun_duration = combat_profile.shoot_hitstun_duration
 	var horizontal_sign := signf(shoot_direction.x)
 	if is_zero_approx(horizontal_sign):
@@ -780,7 +788,7 @@ func _process_attack_hits() -> void:
 				knockback = _get_facing_knockback(combat_profile.heavy_attack_knockback)
 				stun_duration = combat_profile.heavy_attack_hitstun_duration
 			owner.receive_player_attack({
-				"damage": (stats.attack_power if stats != null else combat_profile.base_attack_power) * _attack_damage_scale,
+				"damage": (stats.get_attribute_value(&"attack_power", 10.0) if stats != null else 10.0) * _attack_damage_scale,
 				"attack_kind": _active_attack_action,
 				"source": self,
 				"source_position": global_position,
@@ -788,6 +796,31 @@ func _process_attack_hits() -> void:
 				"stun_duration": stun_duration,
 			})
 			_attack_hit_ids[owner_id] = true
+
+
+func _update_attack_hitbox_shape() -> void:
+	if _attack_hitbox_shape == null:
+		return
+	var facing := float(signs_to_int(signals.facing_direction if signals != null else 1))
+	var target_size := combat_profile.light_attack_hitbox_size
+	var target_offset := combat_profile.light_attack_hitbox_offset
+	if _active_attack_action == &"attack_heavy":
+		target_size = combat_profile.heavy_attack_hitbox_size
+		target_offset = combat_profile.heavy_attack_hitbox_offset
+	var hitbox_shape := _attack_hitbox_shape.shape as RectangleShape2D
+	if hitbox_shape != null:
+		hitbox_shape.size = target_size
+	$HitboxAnchor.position = Vector2(target_offset.x * facing, target_offset.y)
+
+
+func _update_attack_hitbox_visual() -> void:
+	var attack_hitbox_outline := _attack_hitbox as AreaDebugOutline
+	if attack_hitbox_outline == null:
+		return
+	if _active_attack_action == &"attack_heavy":
+		attack_hitbox_outline.outline_color = HEAVY_ATTACK_OUTLINE_COLOR
+		return
+	attack_hitbox_outline.outline_color = LIGHT_ATTACK_OUTLINE_COLOR
 
 
 func _get_facing_knockback(base_knockback: Vector2) -> Vector2:
@@ -1023,11 +1056,21 @@ func _spawn_dash_afterimage() -> void:
 	parent_node.add_child(afterimage)
 
 
+func _update_body_outline() -> void:
+	if _body_outline == null:
+		return
+	var facing := float(signs_to_int(signals.facing_direction if signals != null else 1))
+	_body_outline.set_facing_direction(facing)
+	_body_outline.set_active(true)
+
+
 func _update_guard_outline() -> void:
 	if _guard_outline == null:
 		return
 	var guard_active := _is_guarding()
 	var parry_flash_active := _parry_flash_remaining > 0.0
+	var facing := float(signs_to_int(signals.facing_direction if signals != null else 1))
+	_guard_outline.set_facing_direction(facing)
 	_guard_outline.set_active(guard_active or parry_flash_active)
 	if parry_flash_active:
 		_guard_outline.set_outline_color(Color(1.0, 0.9, 0.38, 1.0))
@@ -1417,8 +1460,7 @@ func reset_for_testroom(target_position: Vector2) -> void:
 	global_position = target_position
 	velocity = Vector2.ZERO
 	if stats != null:
-		stats.current_hp = stats.max_hp
-		stats.current_energy = stats.max_energy
+		stats.apply_respawn_resource_values()
 	if signals != null:
 		signals.is_dead = false
 		signals.can_accept_input = true

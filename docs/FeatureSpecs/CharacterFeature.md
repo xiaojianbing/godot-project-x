@@ -1,8 +1,9 @@
 # Feature Spec: Character 统一角色系统
 
 ## Feature 简述
-一套**统一的角色数据与行为管理系统**，由两大核心模块构成：
-- **CharacterStats（数值层）**：为所有"可交互实体"提供 HP、能量、Buff 等属性管理。
+一套**统一的角色数据与行为管理系统**，由三块基础能力共同构成：
+- **CharacterAttributes（属性层）**：为所有角色提供基础属性模板、修正器和最终属性查询。
+- **CharacterStats（资源层）**：为所有"可交互实体"提供当前 HP、当前能量等运行时资源值管理。
 - **CharacterContext（行为层）**：为所有"有行为的实体"提供状态标志、动画桥接和组件引用枢纽。
 
 覆盖：Player、NPC、Enemy、Boss、可破坏道具（箱子、门、可击碎墙壁等）。
@@ -86,9 +87,10 @@
 └─────────────────────────────────────┘
 ```
 
-- **StateMachine** 读 Context 判断能否切换，读 Stats 判断资源是否足够
+- **StateMachine** 读 Context 判断能否切换，读 Stats / Attributes 判断资源与属性是否满足条件
 - **Context** 是中间枢纽，持有对 Stats、Input、Physics 的引用
-- **Stats** 纯数据层，不关心行为逻辑
+- **Attributes** 保存基础属性真相与最终属性结果
+- **Stats** 保存当前资源值，不关心行为逻辑
 
 ---
 

@@ -32,22 +32,30 @@
 - 使用 `Godot 4` 战斗测试房。
 - 至少需要：Player、基础敌人 Dummy、可配置攻击碰撞、基础 HUD。
 - 测试房统一放在 `scenes/testrooms/` 或后续独立战斗测试目录中。
+- 测试房构建规则：每个房间宽度默认按 `800` 组织，每个房间只承载一个测试主题。
+- 当前测试房为四个横向隔间，每个隔间默认按宽 `800` 组织，并由墙体隔离。
+- 四个隔间依次用于：射击、近战、双发连锁弹反、高位空中弹反。
+
+## Status Legend
+
+- `Covered`：代码、场景与调试路径已落地，具备执行条件，但尚未做完整人工实机验收。
+- `Pending`：仍缺实现或缺对应测试路径。
 
 ## Case Summary
 
 | ID | Test Item | Status | Note |
 | --- | --- | --- | --- |
-| CB-01 | Light Attack Baseline | Pending | 验证轻攻击命中与挥空 |
-| CB-02 | Heavy Attack Baseline | Pending | 验证重攻击命中与挥空 |
-| CB-03 | Shoot Baseline | Pending | 验证射击基础闭环 |
-| CB-04 | Hurt Baseline | Pending | 验证普通受击与无敌帧 |
-| CB-05 | Guard Baseline | Pending | 验证普通防御轻微掉血 |
-| CB-06 | Ground Parry | Pending | 验证地面弹反成功与敌人硬直 |
-| CB-07 | Air Parry | Pending | 验证空中弹反与向上回弹 |
-| CB-08 | Parry Invincibility | Pending | 验证弹反成功后的无敌帧 |
-| CB-09 | Projectile Parry | Pending | 验证飞行物反射回敌人 |
-| CB-10 | Directional Defense | Pending | 验证仅正面可防御 |
-| CB-11 | Result Priority | Pending | 验证 Hurt / Guard / Parry 优先级 |
+| CB-01 | Light Attack Baseline | Covered | 玩家轻攻击框与命中路径已落地，待实机确认挥空/命中差异 |
+| CB-02 | Heavy Attack Baseline | Covered | 玩家重攻击框颜色已区分，待实机确认节奏差异 |
+| CB-03 | Shoot Baseline | Covered | 按住瞄准与松开发射链路已落地，待实机确认方向与命中 |
+| CB-04 | Hurt Baseline | Covered | 受击掉血、击退与短暂无敌已接入，待实机确认 |
+| CB-05 | Guard Baseline | Covered | 正面防御减伤与防御框已接入，待实机确认 |
+| CB-06 | Ground Parry | Covered | 近战敌人与地面验证层已准备好，待实机确认敌人硬直 |
+| CB-07 | Air Parry | Covered | 高位单发机关与回弹逻辑已接入，待实机确认 |
+| CB-08 | Parry Invincibility | Covered | 连锁子弹层可用于验证弹反后无敌窗口，待实机确认 |
+| CB-09 | Projectile Parry | Covered | 射击敌人与双机关层均可验证反射与归属切换 |
+| CB-10 | Directional Defense | Covered | 玩家与敌人朝向框已落地，正反面规则待实机确认 |
+| CB-11 | Result Priority | Covered | 结果分支代码已集中收口，待实机逐项走查 |
 
 ## Test Cases
 
@@ -58,6 +66,7 @@
 - 使用手柄 `X` 触发轻攻击，分别攻击空气与 Dummy。
 - Expected:
 - 玩家能清楚区分轻攻击挥空与命中反馈。
+- 轻攻击框显示为玩家侧亮绿色，并与重攻击框颜色明显不同。
 
 ### CB-02 Heavy Attack Baseline
 
@@ -66,6 +75,7 @@
 - 使用手柄 `Y` 触发重攻击，分别攻击空气与 Dummy。
 - Expected:
 - 重攻击可正常触发，并与轻攻击有清晰节奏差异。
+- 重攻击框显示为玩家侧偏青绿色，并与轻攻击颜色明显不同。
 
 ### CB-03 Shoot Baseline
 

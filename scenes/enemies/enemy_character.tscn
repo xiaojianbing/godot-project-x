@@ -3,8 +3,11 @@
 [ext_resource type="Script" path="res://scripts/enemies/enemy_character.gd" id="1_w8k1m"]
 [ext_resource type="Resource" path="res://resources/characters/enemy_combat_profile.tres" id="2_t3wmu"]
 [ext_resource type="Resource" path="res://resources/characters/enemy_motion_profile.tres" id="3_i2hdg"]
+[ext_resource type="Resource" path="res://resources/characters/enemy_attributes_profile.tres" id="3_i2hdh"]
 [ext_resource type="PackedScene" path="res://scenes/common/parry_projectile.tscn" id="4_qxii2"]
 [ext_resource type="Script" path="res://scripts/common/world_health_bar.gd" id="5_ly9wu"]
+[ext_resource type="Script" path="res://scripts/common/area_debug_outline.gd" id="6_y3f21"]
+[ext_resource type="Script" path="res://scripts/common/state_outline_2d.gd" id="7_k19ah"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(22, 34)
@@ -16,6 +19,7 @@ size = Vector2(30, 28)
 script = ExtResource("1_w8k1m")
 combat_profile = ExtResource("2_t3wmu")
 motion_profile = ExtResource("3_i2hdg")
+attributes_profile = ExtResource("3_i2hdh")
 projectile_scene = ExtResource("4_qxii2")
 collision_layer = 4
 collision_mask = 1
@@ -26,6 +30,13 @@ collision_mask = 1
 color = Color(0.823529, 0.380392, 0.380392, 1)
 polygon = PackedVector2Array(-11, -17, 11, -17, 11, 17, -11, 17)
 
+[node name="BodyOutline" type="Node2D" parent="."]
+script = ExtResource("7_k19ah")
+outline_size = Vector2(28, 38)
+front_outline_color = Color(1, 0.42, 0.2, 0.95)
+back_outline_color = Color(0.82, 0.22, 0.18, 0.88)
+use_facing_colors = true
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_body")
 
@@ -35,7 +46,10 @@ shape = SubResource("RectangleShape2D_body")
 shape = SubResource("RectangleShape2D_body")
 
 [node name="AttackArea" type="Area2D" parent="."]
+script = ExtResource("6_y3f21")
 position = Vector2(22, -2)
+collision_mask = 2
+outline_color = Color(1, 0.42, 0.2, 0.95)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea"]
 shape = SubResource("RectangleShape2D_attack")

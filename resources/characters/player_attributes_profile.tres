@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CharacterAttributesProfile" format=3]
+
+[ext_resource type="Script" path="res://resources/characters/character_attributes_profile.gd" id="1_8p7aa"]
+
+[resource]
+script = ExtResource("1_8p7aa")
+max_hp = 100.0
+max_energy = 100.0
+starting_hp = -1.0
+starting_energy = 0.0
+respawn_hp_mode = &"full"
+respawn_hp_value = 1.0
+respawn_energy_mode = &"starting"
+respawn_energy_value = 0.0
+attack_power = 12.0
+defense_ratio = 1.0
+move_speed_scale = 1.0
+dash_scale = 1.0
+air_control_scale = 1.0

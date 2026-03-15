@@ -114,6 +114,9 @@ These instructions apply to the whole repository unless a deeper `AGENTS.md` ove
 - For small bug fixes or tightly scoped tasks, implementation can proceed directly.
 - Keep terminology consistent with existing docs and folder names.
 - If a requested change carries significant technical or design risk, call out the risk clearly and propose a safer alternative.
+- When building or extending test rooms, default to separate themed rooms rather than mixed-purpose spaces.
+- Test room construction rule: each room should default to a width of `800`, and each room should validate exactly one gameplay theme or mechanic.
+- Separate adjacent test rooms with walls or equivalent blockers so that hazards, enemies, and traversal setups do not interfere across themes.
 
 ### Standard Development Flow
 

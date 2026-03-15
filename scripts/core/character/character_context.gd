@@ -2,12 +2,18 @@ class_name CharacterContext
 extends RefCounted
 
 
+const CHARACTER_ATTRIBUTES_PROFILE_SCRIPT := preload("res://resources/characters/character_attributes_profile.gd")
+const CHARACTER_ATTRIBUTE_SET_SCRIPT := preload("res://scripts/core/character/data/character_attribute_set.gd")
+
+
 var body: Node = null
 var stats: CharacterStats = null
 var signals: CharacterSignals = null
 var combat_profile: CharacterCombatProfile = null
 var motion_profile: CharacterMotionProfile = null
 var animation_bridge: Node = null
+var attributes_profile: Resource = null
+var attribute_set: RefCounted = null
 
 
 func setup(
@@ -16,7 +22,9 @@ func setup(
 	owner_signals: CharacterSignals,
 	owner_combat_profile: CharacterCombatProfile,
 	owner_motion_profile: CharacterMotionProfile,
-	owner_animation_bridge: Node = null
+	owner_animation_bridge: Node = null,
+	owner_attributes_profile: Resource = null,
+	owner_attribute_set: RefCounted = null
 ) -> void:
 	body = owner_body
 	stats = owner_stats
@@ -24,6 +32,8 @@ func setup(
 	combat_profile = owner_combat_profile
 	motion_profile = owner_motion_profile
 	animation_bridge = owner_animation_bridge
+	attributes_profile = owner_attributes_profile
+	attribute_set = owner_attribute_set
 
 
 func set_facing_direction(direction: int) -> void:
