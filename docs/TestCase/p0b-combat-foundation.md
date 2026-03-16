@@ -46,7 +46,7 @@
 | ID | Test Item | Status | Note |
 | --- | --- | --- | --- |
 | CB-01 | Light Attack Baseline | Covered | 玩家轻攻击框与命中路径已落地，待实机确认挥空/命中差异 |
-| CB-02 | Heavy Attack Baseline | Covered | 玩家重攻击框颜色已区分，待实机确认节奏差异 |
+| CB-02 | Heavy Attack Baseline | Covered | 玩家重攻击框颜色与独立时序参数已落地，待实机确认节奏差异 |
 | CB-03 | Shoot Baseline | Covered | 按住瞄准与松开发射链路已落地，待实机确认方向与命中 |
 | CB-04 | Hurt Baseline | Covered | 受击掉血、击退与短暂无敌已接入，待实机确认 |
 | CB-05 | Guard Baseline | Covered | 正面防御减伤与防御框已接入，待实机确认 |

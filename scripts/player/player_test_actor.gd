@@ -690,8 +690,8 @@ func _update_combat_runtime(_delta: float) -> void:
 func _try_start_light_attack() -> void:
 	if not _can_start_combat_action():
 		return
-	_attack_active_remaining = 0.12
-	_attack_recovery_remaining = 0.24
+	_attack_active_remaining = combat_profile.light_attack_active_duration
+	_attack_recovery_remaining = combat_profile.light_attack_recovery_duration
 	_attack_damage_scale = combat_profile.light_attack_damage_scale
 	_active_attack_action = &"attack_light"
 	_attack_hit_ids.clear()
@@ -702,8 +702,8 @@ func _try_start_light_attack() -> void:
 func _try_start_heavy_attack() -> void:
 	if not _can_start_combat_action():
 		return
-	_attack_active_remaining = 0.18
-	_attack_recovery_remaining = 0.34
+	_attack_active_remaining = combat_profile.heavy_attack_active_duration
+	_attack_recovery_remaining = combat_profile.heavy_attack_recovery_duration
 	_attack_damage_scale = combat_profile.heavy_attack_damage_scale
 	_active_attack_action = &"attack_heavy"
 	_attack_hit_ids.clear()
@@ -727,7 +727,7 @@ func _release_shoot_aim() -> void:
 	if not _is_shoot_aiming:
 		return
 	_is_shoot_aiming = false
-	_attack_recovery_remaining = 0.26
+	_attack_recovery_remaining = combat_profile.shoot_release_recovery_duration
 	_attack_damage_scale = combat_profile.shoot_damage_scale
 	_active_attack_action = &"shoot"
 	_attack_hit_ids.clear()
@@ -1593,8 +1593,6 @@ func _can_grapple() -> bool:
 		return false
 	if not grapple_unlocked:
 		return false
-	if is_on_floor():
-		return false
 	if _is_swimming or _is_edge_hanging or _ledge_climb_remaining > 0.0:
 		return false
 	return _current_grapple_point == null
@@ -1605,8 +1603,6 @@ func _get_grapple_failure_reason() -> String:
 		return "input_locked"
 	if not grapple_unlocked:
 		return "grapple_locked"
-	if is_on_floor():
-		return "grounded"
 	if _is_swimming:
 		return "during_swim"
 	if _is_edge_hanging:

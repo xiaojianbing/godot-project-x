@@ -145,6 +145,13 @@ Enemy Attack Hitbox
 | `air_parry_bounce_velocity` | 空中弹反后的向上回弹速度 |
 | `projectile_parry_speed_scale` | 飞行物被反射后的速度倍率 |
 | `guard_front_angle` | 正面防御有效角度范围 |
+| `light_attack_active_duration` | 轻攻击生效持续时间 |
+| `light_attack_recovery_duration` | 轻攻击恢复时间 |
+| `heavy_attack_active_duration` | 重攻击生效持续时间 |
+| `heavy_attack_recovery_duration` | 重攻击恢复时间 |
+| `shoot_release_recovery_duration` | 松开发射后的恢复时间 |
+
+- 当前玩家轻/重攻击与射击收招已从角色脚本硬编码时序迁入 `CharacterCombatProfile`，便于后续统一调参与进入 `P0-C` 连段设计。
 
 ## 7.1 当前调试与反馈约束
 

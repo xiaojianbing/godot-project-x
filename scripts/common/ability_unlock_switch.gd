@@ -10,6 +10,8 @@ extends Area2D
 
 
 func _ready() -> void:
+	monitoring = true
+	collision_mask = 2
 	body_entered.connect(_on_body_entered)
 	_update_display()
 

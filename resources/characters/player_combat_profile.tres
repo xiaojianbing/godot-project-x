@@ -4,6 +4,11 @@
 
 [resource]
 script = ExtResource("1_6h8gv")
+light_attack_active_duration = 0.12
+light_attack_recovery_duration = 0.24
+heavy_attack_active_duration = 0.18
+heavy_attack_recovery_duration = 0.34
+shoot_release_recovery_duration = 0.26
 light_attack_hitbox_size = Vector2(40, 34)
 heavy_attack_hitbox_size = Vector2(40, 34)
 light_attack_hitbox_offset = Vector2(20, -2)
