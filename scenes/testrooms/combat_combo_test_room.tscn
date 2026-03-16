@@ -1,0 +1,231 @@
+[gd_scene format=3 uid="uid://dvg6gajl0vgn8"]
+
+[ext_resource type="PackedScene" uid="uid://bjqwhnq4el5mm" path="res://scenes/player/player_test_actor.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/common/combat_dummy.tscn" id="2_dummy"]
+[ext_resource type="Script" uid="uid://dj37kpfxnvs55" path="res://scripts/ui/player_debug_hud.gd" id="3_hud"]
+[ext_resource type="Script" uid="uid://bgfsbnm11jpuu" path="res://scripts/testrooms/auto_rect_visual.gd" id="4_visual"]
+[ext_resource type="Script" path="res://scripts/testrooms/combat_combo_test_room.gd" id="5_room"]
+
+[sub_resource type="RectangleShape2D" id="Shape_ground"]
+size = Vector2(2520, 40)
+
+[sub_resource type="RectangleShape2D" id="Shape_wall"]
+size = Vector2(40, 1080)
+
+[sub_resource type="RectangleShape2D" id="Shape_divider"]
+size = Vector2(40, 220)
+
+[sub_resource type="RectangleShape2D" id="Shape_platform_wide"]
+size = Vector2(220, 20)
+
+[sub_resource type="RectangleShape2D" id="Shape_platform_small"]
+size = Vector2(120, 20)
+
+[node name="CombatComboTestRoom" type="Node2D" unique_id=1012972430]
+script = ExtResource("5_room")
+
+[node name="Player" parent="." unique_id=1824718298 instance=ExtResource("1_player")]
+position = Vector2(150, 478)
+
+[node name="Ground" type="StaticBody2D" parent="." unique_id=355633187]
+position = Vector2(1280, 540)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground" unique_id=362514962]
+shape = SubResource("Shape_ground")
+
+[node name="Visual" type="Polygon2D" parent="Ground" unique_id=1334982190]
+color = Color(0.180392, 0.203922, 0.25098, 1)
+polygon = PackedVector2Array(-1260, -20, 1260, -20, 1260, 20, -1260, 20)
+script = ExtResource("4_visual")
+
+[node name="LeftWall" type="StaticBody2D" parent="." unique_id=949711395]
+position = Vector2(20, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall" unique_id=497869602]
+shape = SubResource("Shape_wall")
+
+[node name="Visual" type="Polygon2D" parent="LeftWall" unique_id=321373410]
+color = Color(0.180392, 0.203922, 0.25098, 1)
+polygon = PackedVector2Array(-20, -540, 20, -540, 20, 540, -20, 540)
+script = ExtResource("4_visual")
+
+[node name="DividerWall01" type="StaticBody2D" parent="." unique_id=1962040598]
+position = Vector2(860, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DividerWall01" unique_id=1499590033]
+position = Vector2(0, 430)
+shape = SubResource("Shape_divider")
+
+[node name="Visual" type="Polygon2D" parent="DividerWall01" unique_id=507501566]
+position = Vector2(0, 430)
+color = Color(0.180392, 0.203922, 0.25098, 1)
+polygon = PackedVector2Array(-20, -110, 20, -110, 20, 110, -20, 110)
+script = ExtResource("4_visual")
+
+[node name="DividerWall02" type="StaticBody2D" parent="." unique_id=1524021161]
+position = Vector2(1700, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DividerWall02" unique_id=1299263783]
+position = Vector2(0, 430)
+shape = SubResource("Shape_divider")
+
+[node name="Visual" type="Polygon2D" parent="DividerWall02" unique_id=832818098]
+position = Vector2(0, 430)
+color = Color(0.180392, 0.203922, 0.25098, 1)
+polygon = PackedVector2Array(-20, -110, 20, -110, 20, 110, -20, 110)
+script = ExtResource("4_visual")
+
+[node name="RightWall" type="StaticBody2D" parent="." unique_id=970057680]
+position = Vector2(2540, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall" unique_id=1477740986]
+shape = SubResource("Shape_wall")
+
+[node name="Visual" type="Polygon2D" parent="RightWall" unique_id=1483774461]
+color = Color(0.180392, 0.203922, 0.25098, 1)
+polygon = PackedVector2Array(-20, -540, 20, -540, 20, 540, -20, 540)
+script = ExtResource("4_visual")
+
+[node name="AirStartPlatform" type="StaticBody2D" parent="." unique_id=1846267836]
+position = Vector2(1920, 440)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AirStartPlatform" unique_id=1564564959]
+shape = SubResource("Shape_platform_wide")
+
+[node name="Visual" type="Polygon2D" parent="AirStartPlatform" unique_id=369736371]
+color = Color(0.235294, 0.360784, 0.454902, 1)
+polygon = PackedVector2Array(-110, -10, 110, -10, 110, 10, -110, 10)
+script = ExtResource("4_visual")
+
+[node name="AirMidPlatform" type="StaticBody2D" parent="." unique_id=1260839993]
+position = Vector2(2140, 340)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AirMidPlatform" unique_id=1808736147]
+shape = SubResource("Shape_platform_small")
+
+[node name="Visual" type="Polygon2D" parent="AirMidPlatform" unique_id=1925806472]
+color = Color(0.247059, 0.45098, 0.564706, 1)
+polygon = PackedVector2Array(-60, -10, 60, -10, 60, 10, -60, 10)
+script = ExtResource("4_visual")
+
+[node name="AirEndPlatform" type="StaticBody2D" parent="." unique_id=386114014]
+position = Vector2(2350, 250)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AirEndPlatform" unique_id=1422683646]
+shape = SubResource("Shape_platform_small")
+
+[node name="Visual" type="Polygon2D" parent="AirEndPlatform" unique_id=1643937302]
+color = Color(0.298039, 0.509804, 0.615686, 1)
+polygon = PackedVector2Array(-60, -10, 60, -10, 60, 10, -60, 10)
+script = ExtResource("4_visual")
+
+[node name="SmallDummy" parent="." unique_id=756539771 instance=ExtResource("2_dummy")]
+position = Vector2(430, 502)
+floor_y = 502.0
+
+[node name="LargeDummy" parent="." unique_id=719359841 instance=ExtResource("2_dummy")]
+position = Vector2(620, 502)
+combo_reaction_category = &"large"
+floor_y = 502.0
+
+[node name="ArmorDummy" parent="." unique_id=1702137989 instance=ExtResource("2_dummy")]
+position = Vector2(760, 502)
+floor_y = 502.0
+
+[node name="LauncherDummy" parent="." unique_id=1232660914 instance=ExtResource("2_dummy")]
+position = Vector2(1270, 502)
+floor_y = 502.0
+
+[node name="AirDummy" parent="." unique_id=816345013 instance=ExtResource("2_dummy")]
+position = Vector2(2138, 154)
+hover_in_place = true
+
+[node name="SectionMarkers" type="Node2D" parent="." unique_id=1520699953]
+
+[node name="TitleLabel" type="Label" parent="SectionMarkers" unique_id=606500495]
+offset_left = 32.0
+offset_top = 24.0
+offset_right = 460.0
+offset_bottom = 52.0
+theme_override_font_sizes/font_size = 18
+text = "P0-C Combat Combo Foundation"
+
+[node name="InputLabel" type="Label" parent="SectionMarkers" unique_id=1573182514]
+offset_left = 32.0
+offset_top = 58.0
+offset_right = 980.0
+offset_bottom = 82.0
+theme_override_font_sizes/font_size = 14
+text = "Light: F / X  Heavy: G / Y  Shoot: R / B  Grapple: E / LT  Reset: T / Back"
+
+[node name="KnockdownLabel" type="Label" parent="SectionMarkers" unique_id=1194960884]
+offset_left = 100.0
+offset_top = 90.0
+offset_right = 780.0
+offset_bottom = 120.0
+theme_override_font_sizes/font_size = 20
+text = "Section 1 / Width 800 - Knockdown Categories"
+
+[node name="KnockdownHint" type="Label" parent="SectionMarkers" unique_id=40405564]
+offset_left = 80.0
+offset_top = 122.0
+offset_right = 780.0
+offset_bottom = 168.0
+theme_override_font_sizes/font_size = 14
+text = "Test: Light -> Light -> Heavy
+Targets: small / large / super armor"
+
+[node name="LauncherLabel" type="Label" parent="SectionMarkers" unique_id=623945713]
+offset_left = 980.0
+offset_top = 90.0
+offset_right = 1600.0
+offset_bottom = 120.0
+theme_override_font_sizes/font_size = 20
+text = "Section 2 / Width 800 - Launcher Gun Dump"
+
+[node name="LauncherHint" type="Label" parent="SectionMarkers" unique_id=2083796682]
+offset_left = 980.0
+offset_top = 122.0
+offset_right = 1600.0
+offset_bottom = 168.0
+theme_override_font_sizes/font_size = 14
+text = "Test: Light x3 -> Heavy -> Shoot -> Shoot
+Observe: launcher, shot count, reload"
+
+[node name="AirLabel" type="Label" parent="SectionMarkers" unique_id=1384481236]
+offset_left = 1813.0
+offset_top = 36.0
+offset_right = 2483.0
+offset_bottom = 66.0
+theme_override_font_sizes/font_size = 20
+text = "Section 3 / Width 800 - Air Chase Grapple"
+
+[node name="AirHint" type="Label" parent="SectionMarkers" unique_id=1539572822]
+offset_left = 1814.0
+offset_top = 69.0
+offset_right = 2494.0
+offset_bottom = 115.0
+theme_override_font_sizes/font_size = 14
+text = "Test: airborne Light x3 -> Heavy -> Grapple
+Observe: chase target, chase window, pull-in"
+
+[node name="PlayerDebugHud" type="CanvasLayer" parent="." unique_id=1984661344]
+script = ExtResource("3_hud")
+target_path = NodePath("../Player")
+
+[node name="PanelContainer" type="PanelContainer" parent="PlayerDebugHud" unique_id=922945785]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 292.0
+offset_bottom = 286.0
+
+[node name="MarginContainer" type="MarginContainer" parent="PlayerDebugHud/PanelContainer" unique_id=474205076]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="DebugLabel" type="Label" parent="PlayerDebugHud/PanelContainer/MarginContainer" unique_id=1809953824]
+layout_mode = 2
+text = "Combat Combo Debug"

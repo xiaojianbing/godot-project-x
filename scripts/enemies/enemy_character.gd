@@ -164,14 +164,15 @@ func _apply_combo_reaction(hit_data: Dictionary) -> void:
 			velocity = _knockback_velocity
 			signals.current_action_tag = &"enemy_launcher"
 		&"air_chase_launch":
-			_stun_remaining = maxf(_stun_remaining, 0.36)
-			_knockback_velocity = Vector2(_knockback_velocity.x * 0.85, minf(_knockback_velocity.y, -180.0))
+			_stun_remaining = maxf(_stun_remaining, 0.46)
+			_knockback_velocity = Vector2(_knockback_velocity.x * 1.15, maxf(_knockback_velocity.y, 280.0))
 			velocity = _knockback_velocity
+			_hurt_flash_remaining = maxf(_hurt_flash_remaining, 0.16)
 			_spawn_combat_chase_point()
 			signals.current_action_tag = &"enemy_air_launch"
 		&"air_juggle":
-			_stun_remaining = maxf(_stun_remaining, 0.28)
-			_knockback_velocity = Vector2(_knockback_velocity.x * 0.8, minf(_knockback_velocity.y, -120.0))
+			_stun_remaining = maxf(_stun_remaining, 0.38)
+			_knockback_velocity = Vector2(0.0, minf(_knockback_velocity.y, -145.0))
 			velocity = _knockback_velocity
 			signals.current_action_tag = &"enemy_air_juggle"
 		&"heavy_stagger":
@@ -194,7 +195,7 @@ func _spawn_combat_chase_point() -> void:
 	if chase_point == null:
 		return
 	get_parent().add_child(chase_point)
-	chase_point.setup(self, Vector2(0.0, -18.0), 0.5)
+	chase_point.setup(self, Vector2(0.0, -12.0), 0.7)
 	_combat_chase_point = chase_point
 
 

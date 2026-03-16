@@ -38,3 +38,13 @@ position = Vector2(-18, -10)
 script = ExtResource("3_0l3ff")
 target_path = NodePath("..")
 bar_offset = Vector2(-20, -42)
+
+[node name="StatusLabel" type="Label" parent="."]
+offset_left = -46.0
+offset_top = -72.0
+offset_right = 46.0
+offset_bottom = -52.0
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 13
+text = "HIT"
+visible = false

@@ -13,6 +13,9 @@ const COMBAT_CHASE_POINT_SCRIPT := preload("res://scripts/common/combat_chase_po
 @export var projectile_damage: float = 12.0
 @export var respawn_delay: float = 1.25
 @export var combo_reaction_category: StringName = &"humanoid_small"
+@export var floor_y: float = 0.0
+@export var gravity: float = 900.0
+@export var hover_in_place: bool = false
 
 var stats: CharacterStats = CharacterStats.new()
 var signals: CharacterSignals = CharacterSignals.new()
@@ -27,15 +30,20 @@ var _knockback_velocity: Vector2 = Vector2.ZERO
 var _respawn_remaining: float = 0.0
 var _spawn_position: Vector2 = Vector2.ZERO
 var _combat_chase_point: GrapplePoint = null
+var _vertical_velocity: float = 0.0
+var _status_text_remaining: float = 0.0
 
 @onready var _hurtbox: Area2D = $Hurtbox
 @onready var _attack_area: Area2D = $AttackArea
 @onready var _body_visual: Polygon2D = $BodyVisual
 @onready var _projectile_spawn: Marker2D = $ProjectileSpawn
+@onready var _status_label: Label = $StatusLabel
 
 
 func _ready() -> void:
 	_spawn_position = global_position
+	if is_zero_approx(floor_y) and not hover_in_place:
+		floor_y = _spawn_position.y
 	if combat_profile == null:
 		combat_profile = CharacterCombatProfile.new()
 	if attributes_profile != null:
@@ -61,11 +69,19 @@ func _physics_process(delta: float) -> void:
 	_projectile_cycle_remaining = maxf(0.0, _projectile_cycle_remaining - delta)
 	_attack_active_remaining = maxf(0.0, _attack_active_remaining - delta)
 	_hurt_flash_remaining = maxf(0.0, _hurt_flash_remaining - delta)
-	global_position += _knockback_velocity * delta
+	_status_text_remaining = maxf(0.0, _status_text_remaining - delta)
+	_apply_gravity(delta)
+	global_position += Vector2(_knockback_velocity.x, _knockback_velocity.y + _vertical_velocity) * delta
 	_knockback_velocity = _knockback_velocity.move_toward(Vector2.ZERO, 520.0 * delta)
+	if not hover_in_place and global_position.y >= floor_y:
+		global_position.y = floor_y
+		_vertical_velocity = 0.0
+		if _knockback_velocity.y > 0.0:
+			_knockback_velocity.y = 0.0
 	_attack_area.monitoring = _attack_active_remaining > 0.0 and _stun_remaining <= 0.0
 	_attack_area.position.x = -22.0 * float(signi(signals.facing_direction))
 	_projectile_spawn.position.x = -18.0 * float(signi(signals.facing_direction))
+	_update_status_label()
 	if _stun_remaining > 0.0:
 		signals.current_action_tag = &"enemy_stun"
 		_body_visual.color = Color(1.0, 0.78, 0.38, 1.0) if _hurt_flash_remaining > 0.0 else Color(0.964706, 0.682353, 0.352941, 1)
@@ -113,6 +129,7 @@ func respawn_at(target_position: Vector2) -> void:
 	_attack_active_remaining = 0.0
 	_hurt_flash_remaining = 0.0
 	_knockback_velocity = Vector2.ZERO
+	_vertical_velocity = 0.0
 	_respawn_remaining = 0.0
 	_attack_area.monitoring = false
 	_body_visual.color = Color(0.823529, 0.380392, 0.380392, 1)
@@ -133,27 +150,36 @@ func _apply_combo_reaction(hit_data: Dictionary) -> void:
 		&"knockdown":
 			_stun_remaining = maxf(_stun_remaining, 0.72)
 			_knockback_velocity = Vector2(_knockback_velocity.x * 0.6, minf(_knockback_velocity.y, -120.0))
+			_show_status_text("KNOCKDOWN")
 			signals.current_action_tag = &"enemy_knockdown"
 		&"launcher":
 			_stun_remaining = maxf(_stun_remaining, 0.68)
 			_knockback_velocity = Vector2(_knockback_velocity.x * 0.35, minf(_knockback_velocity.y, -260.0))
+			_show_status_text("LAUNCHER")
 			signals.current_action_tag = &"enemy_launcher"
 		&"air_chase_launch":
-			_stun_remaining = maxf(_stun_remaining, 0.36)
-			_knockback_velocity = Vector2(_knockback_velocity.x * 0.85, minf(_knockback_velocity.y, -180.0))
+			_stun_remaining = maxf(_stun_remaining, 0.46)
+			_knockback_velocity = Vector2(_knockback_velocity.x * 1.15, maxf(_knockback_velocity.y, 280.0))
+			_vertical_velocity = 0.0
+			_hurt_flash_remaining = maxf(_hurt_flash_remaining, 0.16)
 			_spawn_combat_chase_point()
+			_show_status_text("CHASE BREAK")
 			signals.current_action_tag = &"enemy_air_launch"
 		&"air_juggle":
-			_stun_remaining = maxf(_stun_remaining, 0.28)
-			_knockback_velocity = Vector2(_knockback_velocity.x * 0.8, minf(_knockback_velocity.y, -120.0))
+			_stun_remaining = maxf(_stun_remaining, 0.38)
+			_knockback_velocity = Vector2(0.0, minf(_knockback_velocity.y, -145.0))
+			_vertical_velocity = minf(_vertical_velocity, -135.0)
+			_show_status_text("JUGGLE")
 			signals.current_action_tag = &"enemy_air_juggle"
 		&"heavy_stagger":
 			_stun_remaining = maxf(_stun_remaining, 0.42)
 			_knockback_velocity = Vector2(_knockback_velocity.x * 0.5, _knockback_velocity.y)
+			_show_status_text("STAGGER")
 			signals.current_action_tag = &"enemy_heavy_stagger"
 		&"resisted":
 			_stun_remaining = maxf(_stun_remaining, 0.12)
 			_knockback_velocity = Vector2(_knockback_velocity.x * 0.25, _knockback_velocity.y)
+			_show_status_text("RESIST")
 			signals.current_action_tag = &"enemy_resisted"
 
 
@@ -165,7 +191,7 @@ func _spawn_combat_chase_point() -> void:
 	if chase_point == null:
 		return
 	get_parent().add_child(chase_point)
-	chase_point.setup(self, Vector2(0.0, -18.0), 0.5)
+	chase_point.setup(self, Vector2(0.0, -12.0), 0.7)
 	_combat_chase_point = chase_point
 
 
@@ -256,6 +282,8 @@ func _get_default_knockback(hit_data: Dictionary) -> Vector2:
 
 func _on_hurt_requested(_hit_data: Variant, _damage_result: DamageResult) -> void:
 	_body_visual.color = Color(1, 0.8, 0.4, 1)
+	if _status_text_remaining <= 0.0:
+		_show_status_text("HIT")
 
 
 func _on_death_requested(_damage_result: DamageResult) -> void:
@@ -266,3 +294,31 @@ func _on_death_requested(_damage_result: DamageResult) -> void:
 	_attack_area.monitoring = false
 	_knockback_velocity = Vector2.ZERO
 	_body_visual.color = Color(0.18, 0.18, 0.18, 1)
+	_show_status_text("DOWN")
+
+
+func _apply_gravity(delta: float) -> void:
+	if hover_in_place:
+		_vertical_velocity = 0.0
+		return
+	if global_position.y < floor_y or _vertical_velocity < 0.0 or _knockback_velocity.y < 0.0:
+		_vertical_velocity += gravity * delta
+		return
+	_vertical_velocity = 0.0
+
+
+func _show_status_text(text: String) -> void:
+	if _status_label == null:
+		return
+	_status_label.text = text
+	_status_text_remaining = 0.75
+
+
+func _update_status_label() -> void:
+	if _status_label == null:
+		return
+	_status_label.visible = _status_text_remaining > 0.0 and not signals.is_dead
+	if not _status_label.visible:
+		return
+	var height_bonus := clampf((floor_y - global_position.y) * 0.12, 0.0, 26.0)
+	_status_label.position = Vector2(-46.0, -72.0 - height_bonus)
