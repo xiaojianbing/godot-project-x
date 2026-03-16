@@ -159,8 +159,8 @@ func _apply_combo_reaction(hit_data: Dictionary) -> void:
 			velocity = _knockback_velocity
 			signals.current_action_tag = &"enemy_knockdown"
 		&"launcher":
-			_stun_remaining = maxf(_stun_remaining, 0.68)
-			_knockback_velocity = Vector2(_knockback_velocity.x * 0.35, minf(_knockback_velocity.y, -260.0))
+			_stun_remaining = maxf(_stun_remaining, 0.74)
+			_knockback_velocity = Vector2(signf(_knockback_velocity.x) * maxf(absf(_knockback_velocity.x), 220.0), minf(_knockback_velocity.y, -245.0))
 			velocity = _knockback_velocity
 			signals.current_action_tag = &"enemy_launcher"
 		&"air_chase_launch":

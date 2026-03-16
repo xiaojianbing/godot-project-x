@@ -5,12 +5,14 @@ extends CharacterBody2D
 const PLAYER_PROJECTILE_SCENE := preload("res://scenes/common/parry_projectile.tscn")
 const DASH_AFTERIMAGE_SCRIPT := preload("res://scripts/common/dash_afterimage.gd")
 const COMBO_RUNTIME_STATE_SCRIPT := preload("res://scripts/player/combo/combo_runtime_state.gd")
-const COMBO_FINISHER_BURST_SHOTS := 6
-const COMBO_FINISHER_BURST_INTERVAL := 0.04
-const COMBO_FINISHER_BURST_SPREAD_DEGREES := 16.0
+const COMBO_SHOOT_BURST_SHOTS := 3
+const COMBO_SHOOT_BURST_INTERVAL := 0.045
+const COMBO_SHOOT_BURST_SPREAD_DEGREES := 12.0
 const AIR_LIGHT_HIT_FLOAT_DURATION := 0.24
 const AIR_LIGHT_HIT_FLOAT_UPWARD_SPEED := -108.0
 const AIR_LIGHT_HIT_RECOIL_BOOST := -142.0
+const COMBO_GRAPPLE_INITIAL_SPEED_MULTIPLIER := 1.3
+const COMBO_GRAPPLE_PULL_SPEED_MULTIPLIER := 1.42
 const WORLD_COLLISION_MASK := 1
 const ENEMY_BODY_COLLISION_MASK := 4
 const PLAYER_DEFAULT_COLLISION_MASK := WORLD_COLLISION_MASK | ENEMY_BODY_COLLISION_MASK
@@ -476,6 +478,8 @@ func _try_consume_grapple() -> void:
 	_grapple_release_remaining = 0.0
 	_grapple_initial_distance = global_position.distance_to(grapple_point.global_position)
 	var initial_speed := motion_profile.grapple_pull_speed * motion_profile.grapple_initial_speed_ratio
+	if combo_grapple and grapple_point != null and grapple_point.has_method("is_combat_chase_point") and bool(grapple_point.call("is_combat_chase_point")):
+		initial_speed *= COMBO_GRAPPLE_INITIAL_SPEED_MULTIPLIER
 	velocity = (grapple_point.global_position - global_position).normalized() * initial_speed
 	if signals != null:
 		signals.current_action_tag = &"grapple"
@@ -506,6 +510,8 @@ func _apply_grapple_motion() -> void:
 	var progress := clampf(1.0 - distance / start_distance, 0.0, 1.0)
 	var speed_ratio := motion_profile.grapple_initial_speed_ratio + (1.0 - motion_profile.grapple_initial_speed_ratio) * pow(progress, 0.55)
 	var target_speed := motion_profile.grapple_pull_speed * speed_ratio
+	if _current_grapple_point != null and _current_grapple_point.has_method("is_combat_chase_point") and bool(_current_grapple_point.call("is_combat_chase_point")):
+		target_speed *= COMBO_GRAPPLE_PULL_SPEED_MULTIPLIER
 	# 这里让钩索拉拽表现为“先被带动、后猛烈加速”，越接近钩点越快，避免整段速度完全恒定。
 	locomotion_motor.apply_grapple_velocity(self, target_point, target_speed, motion_profile.grapple_release_deceleration, get_physics_process_delta_time())
 	if signals != null:
@@ -786,13 +792,13 @@ func _release_shoot_aim() -> void:
 	if combo_controller != null and combo_controller.has_method("resolve_shoot_release_action"):
 		resolved_action = combo_controller.resolve_shoot_release_action()
 	_is_shoot_aiming = false
-	_attack_recovery_remaining = combat_profile.shoot_release_recovery_duration + (0.18 if resolved_action == &"shoot_combo_2" else 0.0)
+	_attack_recovery_remaining = combat_profile.shoot_release_recovery_duration + (0.08 if resolved_action == &"shoot_combo_1" else 0.16 if resolved_action == &"shoot_combo_2" else 0.0)
 	_attack_damage_scale = combat_profile.shoot_damage_scale * (1.08 if _is_combo_shoot_action(resolved_action) else 1.0)
 	_active_attack_action = resolved_action
 	_attack_completion_action_tag = resolved_action
 	_active_attack_combo_reaction = _resolve_shoot_combo_reaction(resolved_action)
 	_attack_hit_ids.clear()
-	if resolved_action == &"shoot_combo_2":
+	if _is_combo_shoot_action(resolved_action):
 		_start_combo_finisher_burst()
 	else:
 		_spawn_player_projectile()
@@ -841,7 +847,7 @@ func _spawn_projectile_with_data(shoot_direction: Vector2, attack_kind: StringNa
 		horizontal_sign = float(signs_to_int(signals.facing_direction if signals != null else 1))
 	projectile.knockback = Vector2(absf(combat_profile.shoot_knockback.x) * horizontal_sign, combat_profile.shoot_knockback.y)
 	if _is_combo_shoot_action(attack_kind):
-		projectile.knockback = Vector2(absf(combat_profile.shoot_knockback.x) * horizontal_sign * 0.75, minf(combat_profile.shoot_knockback.y, -120.0))
+		projectile.knockback = Vector2(absf(combat_profile.shoot_knockback.x) * horizontal_sign * 0.62, minf(combat_profile.shoot_knockback.y, -96.0))
 	projectile.max_lifetime = combat_profile.shoot_projectile_lifetime
 	projectile.velocity = shoot_direction * combat_profile.shoot_projectile_speed
 	if _is_combo_shoot_action(attack_kind):
@@ -849,13 +855,13 @@ func _spawn_projectile_with_data(shoot_direction: Vector2, attack_kind: StringNa
 
 
 func _start_combo_finisher_burst() -> void:
-	_burst_shots_remaining = COMBO_FINISHER_BURST_SHOTS
+	_burst_shots_remaining = COMBO_SHOOT_BURST_SHOTS
 	_burst_shot_interval_remaining = 0.0
 	_burst_attack_kind = _active_attack_action
 	_burst_combo_reaction = _active_attack_combo_reaction
-	_burst_damage_scale = _attack_damage_scale * 0.82
+	_burst_damage_scale = _attack_damage_scale * (0.92 if _active_attack_action == &"shoot_combo_1" else 0.88)
 	_burst_base_direction = _get_shoot_direction()
-	# 这里把第二段追射收口成短时自动连发，松键后快速倾泻 6 发，先锁定基准方向再做扇形抖散，保证既有鬼泣式压制感，也不会因为摇杆轻微抖动把弹幕打散到不可控。
+	# 这里把两段枪追打都收口成固定 3 连发：第一段负责续空压制，第二段负责收尾爆发，方向锁定在松键瞬间，保证视觉扇面稳定且能清楚读出 3+3 的节奏。
 	_fire_next_combo_finisher_burst_shot()
 
 
@@ -871,13 +877,13 @@ func _update_combo_finisher_burst(delta: float) -> void:
 func _fire_next_combo_finisher_burst_shot() -> void:
 	if _burst_shots_remaining <= 0:
 		return
-	var shot_index := COMBO_FINISHER_BURST_SHOTS - _burst_shots_remaining
-	var spread_ratio := 0.0 if COMBO_FINISHER_BURST_SHOTS <= 1 else float(shot_index) / float(COMBO_FINISHER_BURST_SHOTS - 1)
-	var angle_offset := deg_to_rad(lerpf(-COMBO_FINISHER_BURST_SPREAD_DEGREES * 0.5, COMBO_FINISHER_BURST_SPREAD_DEGREES * 0.5, spread_ratio))
+	var shot_index := COMBO_SHOOT_BURST_SHOTS - _burst_shots_remaining
+	var spread_ratio := 0.0 if COMBO_SHOOT_BURST_SHOTS <= 1 else float(shot_index) / float(COMBO_SHOOT_BURST_SHOTS - 1)
+	var angle_offset := deg_to_rad(lerpf(-COMBO_SHOOT_BURST_SPREAD_DEGREES * 0.5, COMBO_SHOOT_BURST_SPREAD_DEGREES * 0.5, spread_ratio))
 	var shot_direction := _burst_base_direction.rotated(angle_offset)
 	_spawn_projectile_with_data(shot_direction, _burst_attack_kind, _burst_combo_reaction, _burst_damage_scale)
 	_burst_shots_remaining -= 1
-	_burst_shot_interval_remaining = COMBO_FINISHER_BURST_INTERVAL if _burst_shots_remaining > 0 else 0.0
+	_burst_shot_interval_remaining = COMBO_SHOOT_BURST_INTERVAL if _burst_shots_remaining > 0 else 0.0
 
 
 func _process_attack_hits() -> void:
@@ -905,8 +911,9 @@ func _process_attack_hits() -> void:
 				knockback = Vector2(knockback.x * 1.2, minf(knockback.y, -150.0))
 				stun_duration += 0.18
 			elif _active_attack_action == &"attack_heavy_launcher":
-				knockback = Vector2(knockback.x * 0.35, minf(knockback.y, -260.0))
-				stun_duration += 0.22
+				var launcher_direction := float(signs_to_int(signals.facing_direction if signals != null else 1))
+				knockback = Vector2(220.0 * launcher_direction, -245.0)
+				stun_duration += 0.28
 			elif _active_attack_action == &"attack_air_heavy_chase":
 				var chase_direction := float(signs_to_int(signals.facing_direction if signals != null else 1))
 				knockback = Vector2(280.0 * chase_direction, 280.0)
