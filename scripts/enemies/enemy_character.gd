@@ -2,6 +2,9 @@ class_name EnemyCharacter
 extends CharacterBody2D
 
 
+const COMBAT_CHASE_POINT_SCRIPT := preload("res://scripts/common/combat_chase_point.gd")
+
+
 @export var combat_profile: CharacterCombatProfile
 @export var motion_profile: CharacterMotionProfile
 @export var attributes_profile: Resource
@@ -15,6 +18,7 @@ extends CharacterBody2D
 @export var preferred_range: float = 180.0
 @export var allow_melee_attack: bool = true
 @export var allow_projectile_attack: bool = true
+@export var combo_reaction_category: StringName = &"humanoid_small"
 
 
 var stats: CharacterStats = CharacterStats.new()
@@ -35,6 +39,7 @@ var _hurt_flash_remaining: float = 0.0
 var _respawn_remaining: float = 0.0
 var _spawn_position: Vector2 = Vector2.ZERO
 var _knockback_velocity: Vector2 = Vector2.ZERO
+var _combat_chase_point: GrapplePoint = null
 
 @onready var _hurtbox: Area2D = $Hurtbox
 @onready var _attack_area: Area2D = $AttackArea
@@ -95,7 +100,19 @@ func receive_player_attack(hit_data: Dictionary) -> DamageResult:
 		velocity = _knockback_velocity
 		_hurt_flash_remaining = 0.08
 		signals.current_action_tag = &"enemy_hit"
+		_apply_combo_reaction(hit_data)
 	return result
+
+
+func get_combo_reaction_context() -> Dictionary:
+	return {
+		"category": combo_reaction_category,
+		"has_super_armor": signals.has_super_armor if signals != null else false,
+	}
+
+
+func has_active_combat_chase_point() -> bool:
+	return _combat_chase_point != null and is_instance_valid(_combat_chase_point) and _combat_chase_point.can_grapple()
 
 
 func respawn_at(target_position: Vector2) -> void:
@@ -119,6 +136,7 @@ func respawn_at(target_position: Vector2) -> void:
 	_hurt_flash_remaining = 0.0
 	_respawn_remaining = 0.0
 	_attack_area.monitoring = false
+	_clear_combat_chase_point()
 
 
 func on_parried(stun_duration: float) -> void:
@@ -130,6 +148,60 @@ func on_parried(stun_duration: float) -> void:
 	_melee_attack_queued = false
 	_projectile_attack_queued = false
 	signals.current_action_tag = &"enemy_parried"
+
+
+func _apply_combo_reaction(hit_data: Dictionary) -> void:
+	var combo_reaction := StringName(hit_data.get("combo_reaction", &""))
+	match combo_reaction:
+		&"knockdown":
+			_stun_remaining = maxf(_stun_remaining, 0.72)
+			_knockback_velocity = Vector2(_knockback_velocity.x * 0.6, minf(_knockback_velocity.y, -120.0))
+			velocity = _knockback_velocity
+			signals.current_action_tag = &"enemy_knockdown"
+		&"launcher":
+			_stun_remaining = maxf(_stun_remaining, 0.68)
+			_knockback_velocity = Vector2(_knockback_velocity.x * 0.35, minf(_knockback_velocity.y, -260.0))
+			velocity = _knockback_velocity
+			signals.current_action_tag = &"enemy_launcher"
+		&"air_chase_launch":
+			_stun_remaining = maxf(_stun_remaining, 0.36)
+			_knockback_velocity = Vector2(_knockback_velocity.x * 0.85, minf(_knockback_velocity.y, -180.0))
+			velocity = _knockback_velocity
+			_spawn_combat_chase_point()
+			signals.current_action_tag = &"enemy_air_launch"
+		&"air_juggle":
+			_stun_remaining = maxf(_stun_remaining, 0.28)
+			_knockback_velocity = Vector2(_knockback_velocity.x * 0.8, minf(_knockback_velocity.y, -120.0))
+			velocity = _knockback_velocity
+			signals.current_action_tag = &"enemy_air_juggle"
+		&"heavy_stagger":
+			_stun_remaining = maxf(_stun_remaining, 0.42)
+			_knockback_velocity = Vector2(_knockback_velocity.x * 0.5, _knockback_velocity.y)
+			velocity = _knockback_velocity
+			signals.current_action_tag = &"enemy_heavy_stagger"
+		&"resisted":
+			_stun_remaining = maxf(_stun_remaining, 0.12)
+			_knockback_velocity = Vector2(_knockback_velocity.x * 0.25, _knockback_velocity.y)
+			velocity = _knockback_velocity
+			signals.current_action_tag = &"enemy_resisted"
+
+
+func _spawn_combat_chase_point() -> void:
+	_clear_combat_chase_point()
+	if COMBAT_CHASE_POINT_SCRIPT == null or get_parent() == null:
+		return
+	var chase_point := COMBAT_CHASE_POINT_SCRIPT.new()
+	if chase_point == null:
+		return
+	get_parent().add_child(chase_point)
+	chase_point.setup(self, Vector2(0.0, -18.0), 0.5)
+	_combat_chase_point = chase_point
+
+
+func _clear_combat_chase_point() -> void:
+	if _combat_chase_point != null and is_instance_valid(_combat_chase_point):
+		_combat_chase_point.queue_free()
+	_combat_chase_point = null
 
 
 func _update_timers(delta: float) -> void:

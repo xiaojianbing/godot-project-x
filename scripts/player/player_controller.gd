@@ -2,10 +2,14 @@ class_name PlayerController
 extends Node
 
 
+const COMBO_CONTROLLER_SCRIPT := preload("res://scripts/player/combo/combo_controller.gd")
+
+
 var input_buffer := PlayerInputBuffer.new()
 var input_snapshot := PlayerInputSnapshot.new()
 var locomotion_motor := LocomotionMotor.new()
 var locomotion_state_machine := LocomotionStateMachine.new()
+var combo_controller: RefCounted = COMBO_CONTROLLER_SCRIPT.new()
 var ground_detector := GroundDetector.new()
 var wall_detector := WallDetector.new()
 var ledge_detector := LedgeDetector.new()
@@ -22,6 +26,8 @@ func _ready() -> void:
 	actor._ensure_input_actions()
 	actor._ensure_profiles()
 	actor._setup_character_foundation()
+	combo_controller.setup(actor)
+	actor.combo_controller = combo_controller
 	locomotion_state_machine.setup()
 	var debug_service := get_node_or_null("/root/DebugService")
 	if debug_service != null:
@@ -37,6 +43,7 @@ func _physics_process(delta: float) -> void:
 	input_buffer.update(delta)
 	actor._handle_input_buffering()
 	actor._update_runtime_timers(delta)
+	combo_controller.update(delta)
 	actor._update_detection_rays()
 	actor._update_combat_input()
 	locomotion_state_machine.sync_from_actor(actor)

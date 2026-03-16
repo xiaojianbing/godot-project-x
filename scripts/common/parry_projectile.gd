@@ -7,6 +7,9 @@ extends Area2D
 @export var hitstun_duration: float = 0.14
 @export var knockback: Vector2 = Vector2(80.0, -20.0)
 @export var max_lifetime: float = 2.2
+var source_actor: Node = null
+var attack_kind: StringName = &"shoot"
+var combo_reaction: StringName = &""
 var velocity: Vector2 = Vector2.ZERO
 var _has_resolved_hit: bool = false
 
@@ -64,14 +67,19 @@ func _on_area_entered(area: Area2D) -> void:
 		return
 	# 统一把飞行物命中结算收口到 projectile 自身，避免运行时实例因 owner 为空而漏掉 Hurtbox 命中。
 	if owner_team == &"player" and target.has_method("receive_player_attack"):
-		target.receive_player_attack({
+		var hit_data := {
 			"damage": damage,
-			"attack_kind": &"shoot",
+			"attack_kind": attack_kind,
 			"source": self,
 			"source_position": global_position,
 			"stun_duration": hitstun_duration,
 			"knockback": Vector2(signf(velocity.x) * absf(knockback.x), knockback.y),
-		})
+		}
+		if combo_reaction != &"":
+			hit_data["combo_reaction"] = combo_reaction
+		var result: Variant = target.receive_player_attack(hit_data)
+		if result is DamageResult and result.applied and source_actor != null and source_actor.has_method("on_player_projectile_hit_confirm"):
+			source_actor.call("on_player_projectile_hit_confirm", attack_kind, StringName(hit_data.get("combo_reaction", &"")))
 		_resolve_hit()
 		return
 	if owner_team == &"enemy" and target is EnemyCharacter:

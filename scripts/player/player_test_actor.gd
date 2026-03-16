@@ -4,6 +4,7 @@ extends CharacterBody2D
 
 const PLAYER_PROJECTILE_SCENE := preload("res://scenes/common/parry_projectile.tscn")
 const DASH_AFTERIMAGE_SCRIPT := preload("res://scripts/common/dash_afterimage.gd")
+const COMBO_RUNTIME_STATE_SCRIPT := preload("res://scripts/player/combo/combo_runtime_state.gd")
 const WORLD_COLLISION_MASK := 1
 const ENEMY_BODY_COLLISION_MASK := 4
 const PLAYER_DEFAULT_COLLISION_MASK := WORLD_COLLISION_MASK | ENEMY_BODY_COLLISION_MASK
@@ -24,6 +25,7 @@ var signals: CharacterSignals
 var context: CharacterContext
 var damage_receiver: DamageReceiver
 var controller: PlayerController
+var combo_controller: RefCounted = null
 
 var _coyote_time_remaining: float = 0.0
 var _dash_time_remaining: float = 0.0
@@ -70,6 +72,8 @@ var _last_grapple_failure_reason: String = "ready"
 var _last_combat_result: String = "ready"
 var _last_attack_action: String = "none"
 var _active_attack_action: StringName = &"attack_light"
+var _attack_completion_action_tag: StringName = &""
+var _active_attack_combo_reaction: StringName = &""
 
 @onready var _body_shape: CollisionShape2D = $CollisionShape2D
 @onready var _hurtbox: Area2D = $Hurtbox
@@ -297,6 +301,7 @@ func _update_runtime_timers(delta: float) -> void:
 	_double_jump_state_remaining = maxf(0.0, _double_jump_state_remaining - delta)
 	if controller != null:
 		_coyote_time_remaining = controller.ground_detector.update_coyote_time(self, _coyote_time_remaining, motion_profile.coyote_time, delta)
+	_finalize_completed_combat_action()
 
 
 func _update_detection_rays() -> void:
@@ -441,7 +446,8 @@ func _try_consume_grapple() -> void:
 	if not _can_grapple():
 		_last_grapple_failure_reason = _get_grapple_failure_reason()
 		return
-	var grapple_point := _find_best_grapple_point()
+	var combo_grapple: bool = combo_controller != null and combo_controller.has_method("can_begin_grapple_chase") and combo_controller.can_begin_grapple_chase()
+	var grapple_point := _find_best_grapple_point(combo_grapple)
 	if grapple_point == null:
 		_last_grapple_failure_reason = "no_point"
 		return
@@ -455,6 +461,8 @@ func _try_consume_grapple() -> void:
 	velocity = (grapple_point.global_position - global_position).normalized() * initial_speed
 	if signals != null:
 		signals.current_action_tag = &"grapple"
+	if combo_grapple and combo_controller != null and combo_controller.has_method("note_grapple_chase_started"):
+		combo_controller.note_grapple_chase_started()
 	_last_grapple_failure_reason = "grappled"
 
 
@@ -677,6 +685,8 @@ func _update_combat_runtime(_delta: float) -> void:
 	if _attack_hitbox == null:
 		return
 	_update_shoot_aim_state()
+	if combo_controller != null:
+		combo_controller.set_grapple_chase_target_available(_has_available_combat_chase_point())
 	_update_attack_hitbox_shape()
 	_update_attack_hitbox_visual()
 	if _attack_active_remaining > 0.0:
@@ -690,50 +700,85 @@ func _update_combat_runtime(_delta: float) -> void:
 func _try_start_light_attack() -> void:
 	if not _can_start_combat_action():
 		return
-	_attack_active_remaining = combat_profile.light_attack_active_duration
-	_attack_recovery_remaining = combat_profile.light_attack_recovery_duration
-	_attack_damage_scale = combat_profile.light_attack_damage_scale
-	_active_attack_action = &"attack_light"
+	var resolved_action := &"attack_light"
+	if combo_controller != null and combo_controller.has_method("resolve_light_action"):
+		resolved_action = combo_controller.resolve_light_action()
+	var is_combo_light := resolved_action == &"attack_light_3" or resolved_action == &"attack_air_light_2" or resolved_action == &"attack_air_light_3"
+	_attack_active_remaining = combat_profile.light_attack_active_duration + (0.02 if is_combo_light else 0.0)
+	_attack_recovery_remaining = combat_profile.light_attack_recovery_duration + (0.03 if is_combo_light else 0.0)
+	_attack_damage_scale = combat_profile.light_attack_damage_scale * (1.08 if is_combo_light else 1.0)
+	_active_attack_action = resolved_action
+	_attack_completion_action_tag = resolved_action
+	_active_attack_combo_reaction = &""
 	_attack_hit_ids.clear()
-	_last_combat_result = "attack_light"
-	_last_attack_action = "attack_light"
+	_last_combat_result = String(resolved_action)
+	_last_attack_action = String(resolved_action)
+	if combo_controller != null:
+		combo_controller.note_action_started(resolved_action)
 
 
 func _try_start_heavy_attack() -> void:
 	if not _can_start_combat_action():
 		return
-	_attack_active_remaining = combat_profile.heavy_attack_active_duration
-	_attack_recovery_remaining = combat_profile.heavy_attack_recovery_duration
-	_attack_damage_scale = combat_profile.heavy_attack_damage_scale
-	_active_attack_action = &"attack_heavy"
+	var resolved_action := &"attack_heavy"
+	if combo_controller != null and combo_controller.has_method("resolve_heavy_action"):
+		resolved_action = combo_controller.resolve_heavy_action()
+	var is_finisher := resolved_action == &"attack_heavy_finisher"
+	var is_launcher := resolved_action == &"attack_heavy_launcher"
+	var is_air_chase := resolved_action == &"attack_air_heavy_chase"
+	_attack_active_remaining = combat_profile.heavy_attack_active_duration + (0.05 if is_finisher else 0.03 if is_launcher else 0.04 if is_air_chase else 0.0)
+	_attack_recovery_remaining = combat_profile.heavy_attack_recovery_duration + (0.08 if is_finisher else 0.06 if is_launcher else 0.06 if is_air_chase else 0.0)
+	_attack_damage_scale = combat_profile.heavy_attack_damage_scale * (1.3 if is_finisher else 1.15 if is_launcher else 1.12 if is_air_chase else 1.0)
+	_active_attack_action = resolved_action
+	_attack_completion_action_tag = resolved_action
+	_active_attack_combo_reaction = &"knockdown" if is_finisher else &"launcher" if is_launcher else &"air_chase_launch" if is_air_chase else &""
 	_attack_hit_ids.clear()
-	_last_combat_result = "attack_heavy"
-	_last_attack_action = "attack_heavy"
+	_last_combat_result = String(resolved_action)
+	_last_attack_action = String(resolved_action)
+	if combo_controller != null:
+		combo_controller.note_action_started(resolved_action)
 
 
 func _try_begin_shoot_aim() -> void:
 	if not _can_start_combat_action():
 		return
+	var resolved_action := &"shoot_aim"
+	if combo_controller != null and combo_controller.has_method("begin_shoot_aim"):
+		resolved_action = combo_controller.begin_shoot_aim()
+	if resolved_action == &"":
+		_last_combat_result = "reload"
+		_last_attack_action = "reload"
+		return
 	_is_shoot_aiming = true
 	_attack_active_remaining = 0.0
 	_attack_recovery_remaining = 0.0
-	_active_attack_action = &"shoot_aim"
+	_active_attack_action = resolved_action
 	var facing := float(signs_to_int(signals.facing_direction if signals != null else 1))
 	_shoot_aim_direction = Vector2(facing, 0.0)
-	_last_combat_result = "shoot_aim"
+	_last_combat_result = String(resolved_action)
+	_last_attack_action = String(resolved_action)
+	if combo_controller != null:
+		combo_controller.note_action_started(resolved_action)
 
 
 func _release_shoot_aim() -> void:
 	if not _is_shoot_aiming:
 		return
+	var resolved_action := &"shoot"
+	if combo_controller != null and combo_controller.has_method("resolve_shoot_release_action"):
+		resolved_action = combo_controller.resolve_shoot_release_action()
 	_is_shoot_aiming = false
 	_attack_recovery_remaining = combat_profile.shoot_release_recovery_duration
-	_attack_damage_scale = combat_profile.shoot_damage_scale
-	_active_attack_action = &"shoot"
+	_attack_damage_scale = combat_profile.shoot_damage_scale * (1.08 if _is_combo_shoot_action(resolved_action) else 1.0)
+	_active_attack_action = resolved_action
+	_attack_completion_action_tag = resolved_action
+	_active_attack_combo_reaction = _resolve_shoot_combo_reaction(resolved_action)
 	_attack_hit_ids.clear()
 	_spawn_player_projectile()
-	_last_combat_result = "shoot"
-	_last_attack_action = "shoot"
+	_last_combat_result = String(resolved_action)
+	_last_attack_action = String(resolved_action)
+	if combo_controller != null:
+		combo_controller.note_action_started(resolved_action)
 
 
 func _can_start_combat_action() -> bool:
@@ -759,14 +804,21 @@ func _spawn_player_projectile() -> void:
 	var shoot_direction := _get_shoot_direction()
 	projectile.global_position = global_position + shoot_direction * 18.0
 	projectile.set_owner_team(&"player")
-	projectile.damage = (stats.get_attribute_value(&"attack_power", 10.0) if stats != null else 10.0) * combat_profile.shoot_damage_scale
-	projectile.hitstun_duration = combat_profile.shoot_hitstun_duration
+	projectile.source_actor = self
+	projectile.attack_kind = _active_attack_action
+	projectile.combo_reaction = _active_attack_combo_reaction
+	projectile.damage = (stats.get_attribute_value(&"attack_power", 10.0) if stats != null else 10.0) * _attack_damage_scale
+	projectile.hitstun_duration = combat_profile.shoot_hitstun_duration + (0.08 if _is_combo_shoot_action(_active_attack_action) else 0.0)
 	var horizontal_sign := signf(shoot_direction.x)
 	if is_zero_approx(horizontal_sign):
 		horizontal_sign = float(signs_to_int(signals.facing_direction if signals != null else 1))
 	projectile.knockback = Vector2(absf(combat_profile.shoot_knockback.x) * horizontal_sign, combat_profile.shoot_knockback.y)
+	if _is_combo_shoot_action(_active_attack_action):
+		projectile.knockback = Vector2(absf(combat_profile.shoot_knockback.x) * horizontal_sign * 0.75, minf(combat_profile.shoot_knockback.y, -120.0))
 	projectile.max_lifetime = combat_profile.shoot_projectile_lifetime
 	projectile.velocity = shoot_direction * combat_profile.shoot_projectile_speed
+	if _is_combo_shoot_action(_active_attack_action):
+		projectile.velocity.y = minf(projectile.velocity.y, -120.0)
 
 
 func _process_attack_hits() -> void:
@@ -784,18 +836,36 @@ func _process_attack_hits() -> void:
 		if owner.has_method("receive_player_attack"):
 			var knockback := _get_facing_knockback(combat_profile.light_attack_knockback)
 			var stun_duration := combat_profile.light_attack_hitstun_duration
-			if _active_attack_action == &"attack_heavy":
+			if _is_heavy_attack_action(_active_attack_action):
 				knockback = _get_facing_knockback(combat_profile.heavy_attack_knockback)
 				stun_duration = combat_profile.heavy_attack_hitstun_duration
-			owner.receive_player_attack({
+			if _active_attack_action == &"attack_heavy_finisher":
+				knockback = Vector2(knockback.x * 1.2, minf(knockback.y, -150.0))
+				stun_duration += 0.18
+			elif _active_attack_action == &"attack_heavy_launcher":
+				knockback = Vector2(knockback.x * 0.35, minf(knockback.y, -260.0))
+				stun_duration += 0.22
+			elif _active_attack_action == &"attack_air_heavy_chase":
+				knockback = Vector2(knockback.x * 0.8, minf(knockback.y, -180.0))
+				stun_duration += 0.18
+			var combo_reaction := _resolve_combo_reaction_for_target(owner)
+			var hit_data := {
 				"damage": (stats.get_attribute_value(&"attack_power", 10.0) if stats != null else 10.0) * _attack_damage_scale,
 				"attack_kind": _active_attack_action,
 				"source": self,
 				"source_position": global_position,
 				"knockback": knockback,
 				"stun_duration": stun_duration,
-			})
-			_attack_hit_ids[owner_id] = true
+			}
+			if combo_reaction != &"":
+				hit_data["combo_reaction"] = combo_reaction
+			var attack_result: Variant = owner.receive_player_attack(hit_data)
+			if attack_result is DamageResult and attack_result.applied:
+				if combo_controller != null:
+					combo_controller.note_hit_confirm_satisfied()
+					if combo_reaction != &"":
+						combo_controller.note_target_reaction(combo_reaction)
+				_attack_hit_ids[owner_id] = true
 
 
 func _update_attack_hitbox_shape() -> void:
@@ -804,7 +874,7 @@ func _update_attack_hitbox_shape() -> void:
 	var facing := float(signs_to_int(signals.facing_direction if signals != null else 1))
 	var target_size := combat_profile.light_attack_hitbox_size
 	var target_offset := combat_profile.light_attack_hitbox_offset
-	if _active_attack_action == &"attack_heavy":
+	if _is_heavy_attack_action(_active_attack_action):
 		target_size = combat_profile.heavy_attack_hitbox_size
 		target_offset = combat_profile.heavy_attack_hitbox_offset
 	var hitbox_shape := _attack_hitbox_shape.shape as RectangleShape2D
@@ -817,10 +887,79 @@ func _update_attack_hitbox_visual() -> void:
 	var attack_hitbox_outline := _attack_hitbox as AreaDebugOutline
 	if attack_hitbox_outline == null:
 		return
-	if _active_attack_action == &"attack_heavy":
+	if _active_attack_action == &"attack_heavy_finisher":
+		attack_hitbox_outline.outline_color = Color(1.0, 0.75, 0.22, 0.98)
+		return
+	if _active_attack_action == &"attack_heavy_launcher":
+		attack_hitbox_outline.outline_color = Color(0.52, 0.72, 1.0, 0.98)
+		return
+	if _active_attack_action == &"attack_air_heavy_chase":
+		attack_hitbox_outline.outline_color = Color(1.0, 0.58, 0.36, 0.98)
+		return
+	if _is_heavy_attack_action(_active_attack_action):
 		attack_hitbox_outline.outline_color = HEAVY_ATTACK_OUTLINE_COLOR
 		return
+	if _active_attack_action == &"attack_light_3" or _active_attack_action == &"attack_air_light_2" or _active_attack_action == &"attack_air_light_3":
+		attack_hitbox_outline.outline_color = Color(0.42, 0.98, 0.82, 0.95)
+		return
 	attack_hitbox_outline.outline_color = LIGHT_ATTACK_OUTLINE_COLOR
+
+
+func _resolve_combo_reaction_for_target(owner: Node) -> StringName:
+	if _active_attack_combo_reaction == &"":
+		return &""
+	if owner == null or not owner.has_method("get_combo_reaction_context"):
+		return _active_attack_combo_reaction
+	var reaction_context: Variant = owner.call("get_combo_reaction_context")
+	if not (reaction_context is Dictionary):
+		return _active_attack_combo_reaction
+	var context_dictionary: Dictionary = reaction_context
+	if bool(context_dictionary.get("has_super_armor", false)):
+		return &"resisted"
+	var reaction_category := StringName(context_dictionary.get("category", &"humanoid_small"))
+	if _active_attack_combo_reaction == &"knockdown" and reaction_category == &"large":
+		return &"heavy_stagger"
+	if _active_attack_combo_reaction == &"launcher" and reaction_category == &"large":
+		return &"heavy_stagger"
+	if _active_attack_combo_reaction == &"air_chase_launch" and reaction_category == &"large":
+		return &"heavy_stagger"
+	return _active_attack_combo_reaction
+
+
+func _is_heavy_attack_action(action_tag: StringName) -> bool:
+	return action_tag == &"attack_heavy" or action_tag == &"attack_heavy_finisher" or action_tag == &"attack_heavy_launcher" or action_tag == &"attack_air_heavy_chase"
+
+
+func _is_combo_shoot_action(action_tag: StringName) -> bool:
+	return action_tag == &"shoot_combo_1" or action_tag == &"shoot_combo_2"
+
+
+func _resolve_shoot_combo_reaction(action_tag: StringName) -> StringName:
+	if _is_combo_shoot_action(action_tag):
+		return &"air_juggle"
+	return &""
+
+
+func _finalize_completed_combat_action() -> void:
+	if _is_shoot_aiming:
+		return
+	if _attack_completion_action_tag == &"":
+		return
+	if _attack_active_remaining > 0.0 or _attack_recovery_remaining > 0.0:
+		return
+	if combo_controller != null:
+		combo_controller.note_action_completed(_attack_completion_action_tag)
+	_attack_completion_action_tag = &""
+	_active_attack_combo_reaction = &""
+
+
+func on_player_projectile_hit_confirm(attack_kind: StringName, combo_reaction: StringName) -> void:
+	if combo_controller == null:
+		return
+	combo_controller.note_hit_confirm_satisfied()
+	if combo_reaction != &"":
+		combo_controller.note_target_reaction(combo_reaction)
+	_last_attack_action = String(attack_kind)
 
 
 func _get_facing_knockback(base_knockback: Vector2) -> Vector2:
@@ -889,6 +1028,10 @@ func receive_combat_hit(hit_data: Dictionary) -> DamageResult:
 		_hurt_knockback_velocity = _get_hurt_knockback(hit_data)
 		velocity = _hurt_knockback_velocity
 		_last_combat_result = "hurt"
+		_attack_completion_action_tag = &""
+		_active_attack_combo_reaction = &""
+		if combo_controller != null:
+			combo_controller.reset_runtime_state()
 	return result
 
 
@@ -1003,6 +1146,10 @@ func _on_death_requested(_damage_result: DamageResult) -> void:
 		if body_visual != null:
 			body_visual.color = Color(0.16, 0.16, 0.2, 1.0)
 	_last_combat_result = "death"
+	_attack_completion_action_tag = &""
+	_active_attack_combo_reaction = &""
+	if combo_controller != null:
+		combo_controller.reset_runtime_state()
 
 
 func _update_player_visual_state() -> void:
@@ -1489,11 +1636,19 @@ func reset_for_testroom(target_position: Vector2) -> void:
 	_is_swimming = false
 	_last_combat_result = "ready"
 	_last_attack_action = "none"
+	_attack_completion_action_tag = &""
+	_active_attack_combo_reaction = &""
+	if combo_controller != null:
+		combo_controller.reset_runtime_state()
 	_reset_air_jump_charges()
 
 
 func get_last_attack_action() -> String:
 	return _last_attack_action
+
+
+func get_combo_runtime_state() -> RefCounted:
+	return combo_controller.get_runtime_state() if combo_controller != null else null
 
 
 func get_parry_window_remaining() -> float:
@@ -1614,7 +1769,7 @@ func _get_grapple_failure_reason() -> String:
 	return "no_point"
 
 
-func _find_best_grapple_point() -> GrapplePoint:
+func _find_best_grapple_point(prefer_combat_chase: bool = false) -> GrapplePoint:
 	var best_point: GrapplePoint = null
 	var best_distance := INF
 	var facing := Vector2(float(signs_to_int(signals.facing_direction if signals != null else 1)), 0.0)
@@ -1633,10 +1788,23 @@ func _find_best_grapple_point() -> GrapplePoint:
 		var angle := rad_to_deg(acos(clampf(facing.normalized().dot(to_point.normalized()), -1.0, 1.0)))
 		if angle > motion_profile.grapple_snap_angle:
 			continue
-		if distance < best_distance:
-			best_distance = distance
+		var adjusted_distance := distance
+		if prefer_combat_chase and grapple_point.has_method("get_grapple_priority_bonus"):
+			adjusted_distance -= float(grapple_point.call("get_grapple_priority_bonus"))
+		if adjusted_distance < best_distance:
+			best_distance = adjusted_distance
 			best_point = grapple_point
 	return best_point
+
+
+func _has_available_combat_chase_point() -> bool:
+	for node in get_tree().get_nodes_in_group("grapple_points"):
+		if node == null or not node is GrapplePoint:
+			continue
+		var grapple_point := node as GrapplePoint
+		if node.has_method("is_combat_chase_point") and bool(node.call("is_combat_chase_point")) and grapple_point.can_grapple():
+			return true
+	return false
 
 
 func _release_grapple(reason: String) -> void:

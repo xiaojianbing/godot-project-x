@@ -48,3 +48,19 @@ func _process(_delta: float) -> void:
 	if signals != null:
 		_label.text += "\nACTION: %s\nINVINCIBLE: %s" % [String(signals.current_action_tag), str(signals.is_invincible)]
 	_label.text += "\nATTACK: %s\nCOMBAT: %s\nJUMP_FAIL: %s\nDASH_FAIL: %s\nSWIM_FAIL: %s\nGRAPPLE_FAIL: %s" % [player_actor.get_last_attack_action(), player_actor.get_last_combat_result(), player_actor.get_last_jump_failure_reason(), player_actor.get_last_dash_failure_reason(), player_actor.get_last_swim_failure_reason(), player_actor.get_last_grapple_failure_reason()]
+	var combo_state: Variant = player_actor.get_combo_runtime_state()
+	if combo_state != null:
+		_label.text += "\nCOMBO: %s / %s\nFOLLOWUP: %s (%.2f)  HIT_OK: %s\nHEAVY: %s  SHOOT: %s\nREACTION: %s  SHOTS: %d\nRELOAD: %s (%.2f)  CHASE: %s" % [
+			String(combo_state.current_chain_id),
+			String(combo_state.current_step_id),
+			str(combo_state.followup_window_open),
+			combo_state.followup_window_remaining,
+			str(combo_state.hit_confirm_satisfied),
+			String(combo_state.resolved_heavy_action_tag),
+			String(combo_state.resolved_shoot_action_tag),
+			String(combo_state.last_target_reaction),
+			combo_state.combo_shot_count,
+			str(combo_state.in_reload_state),
+			combo_state.reload_remaining,
+			str(combo_state.grapple_chase_target_available),
+		]
