@@ -7,6 +7,7 @@ extends Area2D
 @export var hitstun_duration: float = 0.14
 @export var knockback: Vector2 = Vector2(80.0, -20.0)
 @export var max_lifetime: float = 2.2
+@export var startup_delay: float = 0.0
 var source_actor: Node = null
 var attack_kind: StringName = &"shoot"
 var combo_reaction: StringName = &""
@@ -16,13 +17,16 @@ var _has_resolved_hit: bool = false
 @onready var _visual: Polygon2D = $Visual
 
 var _lifetime_remaining: float = 0.0
+var _startup_remaining: float = 0.0
 
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)
 	_lifetime_remaining = max_lifetime
+	_startup_remaining = maxf(startup_delay, 0.0)
 	_update_visual_style()
+	_update_visual_orientation()
 
 
 func _physics_process(delta: float) -> void:
@@ -31,6 +35,9 @@ func _physics_process(delta: float) -> void:
 	_lifetime_remaining = maxf(0.0, _lifetime_remaining - delta)
 	if _lifetime_remaining <= 0.0:
 		_resolve_hit()
+		return
+	if _startup_remaining > 0.0:
+		_startup_remaining = maxf(0.0, _startup_remaining - delta)
 		return
 	global_position += velocity * delta
 	_update_visual_orientation()

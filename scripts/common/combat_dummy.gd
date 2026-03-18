@@ -153,9 +153,9 @@ func _apply_combo_reaction(hit_data: Dictionary) -> void:
 			_show_status_text("KNOCKDOWN")
 			signals.current_action_tag = &"enemy_knockdown"
 		&"launcher":
-			_stun_remaining = maxf(_stun_remaining, 0.74)
-			_knockback_velocity = Vector2(signf(_knockback_velocity.x) * maxf(absf(_knockback_velocity.x), 220.0), minf(_knockback_velocity.y, -245.0))
-			_vertical_velocity = minf(_vertical_velocity, -210.0)
+			_stun_remaining = maxf(_stun_remaining, 1.02)
+			_knockback_velocity = Vector2(signf(_knockback_velocity.x) * maxf(absf(_knockback_velocity.x), 188.0), minf(_knockback_velocity.y, -336.0))
+			_vertical_velocity = minf(_vertical_velocity, -280.0)
 			_show_status_text("LAUNCHER")
 			signals.current_action_tag = &"enemy_launcher"
 		&"air_chase_launch":
@@ -171,6 +171,12 @@ func _apply_combo_reaction(hit_data: Dictionary) -> void:
 			_knockback_velocity = Vector2(0.0, minf(_knockback_velocity.y, -145.0))
 			_vertical_velocity = minf(_vertical_velocity, -135.0)
 			_show_status_text("JUGGLE")
+			signals.current_action_tag = &"enemy_air_juggle"
+		&"launcher_juggle":
+			_stun_remaining = maxf(_stun_remaining, 0.36)
+			_knockback_velocity = Vector2(0.0, minf(_knockback_velocity.y, -138.0))
+			_vertical_velocity = minf(_vertical_velocity, -176.0)
+			_show_status_text("GUN JUGGLE")
 			signals.current_action_tag = &"enemy_air_juggle"
 		&"heavy_stagger":
 			_stun_remaining = maxf(_stun_remaining, 0.42)

@@ -2,7 +2,7 @@ class_name AimGuide2D
 extends Node2D
 
 
-@export var guide_length: float = 40.0
+@export var guide_length: float = 200.0
 @export var guide_color: Color = Color(0.38, 0.92, 1.0, 0.9)
 @export var guide_width: float = 2.0
 

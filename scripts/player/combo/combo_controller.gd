@@ -17,7 +17,7 @@ const LAUNCHER_SHOOT_1_STEP_ID := &"launcher_shoot_1"
 const LAUNCHER_SHOOT_2_STEP_ID := &"launcher_shoot_2"
 const LAUNCHER_RELOAD_STEP_ID := &"launcher_reload"
 const LAUNCHER_FOLLOWUP_WINDOW := 0.34
-const LAUNCHER_SHOOT_WINDOW := 0.42
+const LAUNCHER_SHOOT_WINDOW := 0.56
 const LAUNCHER_RELOAD_DURATION := 0.72
 const AIR_CHASE_CHAIN_ID := &"air_chase_grapple_string"
 const AIR_LIGHT_1_STEP_ID := &"air_light_1"
@@ -130,17 +130,25 @@ func begin_shoot_aim() -> StringName:
 		runtime_state.resolved_shoot_action_tag = &"reload"
 		return &""
 	if _can_prepare_launcher_shoot(LAUNCHER_HEAVY_STEP_ID, LAUNCHER_SHOOT_1_STEP_ID):
-		_pending_combo_shoot_step = LAUNCHER_SHOOT_1_STEP_ID
+		runtime_state.current_chain_id = LAUNCHER_CHAIN_ID
+		runtime_state.current_step_id = LAUNCHER_SHOOT_1_STEP_ID
+		runtime_state.combo_shot_count = 1
+		runtime_state.hit_confirm_satisfied = false
 		runtime_state.resolved_shoot_action_tag = &"shoot_combo_1"
 		runtime_state.awaiting_followup_input = false
 		_close_followup_window()
-		return &"shoot_combo_aim"
+		_pending_combo_shoot_step = &""
+		return &"shoot_combo_1"
 	if _can_prepare_launcher_shoot(LAUNCHER_SHOOT_1_STEP_ID, LAUNCHER_SHOOT_2_STEP_ID):
-		_pending_combo_shoot_step = LAUNCHER_SHOOT_2_STEP_ID
+		runtime_state.current_chain_id = LAUNCHER_CHAIN_ID
+		runtime_state.current_step_id = LAUNCHER_SHOOT_2_STEP_ID
+		runtime_state.combo_shot_count = 2
+		runtime_state.hit_confirm_satisfied = false
 		runtime_state.resolved_shoot_action_tag = &"shoot_combo_2"
 		runtime_state.awaiting_followup_input = false
 		_close_followup_window()
-		return &"shoot_combo_aim"
+		_pending_combo_shoot_step = &""
+		return &"shoot_combo_2"
 	if runtime_state.current_chain_id == LAUNCHER_CHAIN_ID and runtime_state.followup_window_open:
 		_clear_chain_progress()
 	_pending_combo_shoot_step = &""
@@ -166,26 +174,8 @@ func note_grapple_chase_started() -> void:
 
 
 func resolve_shoot_release_action() -> StringName:
-	match _pending_combo_shoot_step:
-		LAUNCHER_SHOOT_1_STEP_ID:
-			runtime_state.current_chain_id = LAUNCHER_CHAIN_ID
-			runtime_state.current_step_id = LAUNCHER_SHOOT_1_STEP_ID
-			runtime_state.combo_shot_count = 1
-			runtime_state.hit_confirm_satisfied = false
-			runtime_state.resolved_shoot_action_tag = &"shoot_combo_1"
-			_pending_combo_shoot_step = &""
-			return &"shoot_combo_1"
-		LAUNCHER_SHOOT_2_STEP_ID:
-			runtime_state.current_chain_id = LAUNCHER_CHAIN_ID
-			runtime_state.current_step_id = LAUNCHER_SHOOT_2_STEP_ID
-			runtime_state.combo_shot_count = 2
-			runtime_state.hit_confirm_satisfied = false
-			runtime_state.resolved_shoot_action_tag = &"shoot_combo_2"
-			_pending_combo_shoot_step = &""
-			return &"shoot_combo_2"
-		_:
-			runtime_state.resolved_shoot_action_tag = &"shoot"
-			return &"shoot"
+	runtime_state.resolved_shoot_action_tag = &"shoot"
+	return &"shoot"
 
 
 func note_action_started(action_tag: StringName) -> void:
